@@ -1,0 +1,9 @@
+# Service autonome ; connecter au réseau NPM selon README.md.
+services:
+  tools:
+    build:
+      context: ../..
+      dockerfile: deploy/tools/Dockerfile
+    restart: unless-stopped
+    expose:
+      - "80"
