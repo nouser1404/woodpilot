@@ -1,0 +1,15 @@
+{
+  "name": "woodpilot-tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:tools": "node scripts/tools-preview.mjs",
+    "test": "node --test frontend/tests/woodpilot-mobile.test.mjs",
+    "check": "npm test",
+    "check:full": "npm run check"
+  }
+}
