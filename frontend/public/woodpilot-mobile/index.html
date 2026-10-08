@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0d0f10">
+  <title>WoodPilot</title>
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">WOODPILOT</div>
+      <h1 id="pageTitle">Roue</h1>
+    </div>
+    <button class="icon-btn" id="themeBtn" aria-label="Changer le thème">
+      <span aria-hidden="true" class="material-symbols-rounded">light_mode</span>
+    </button>
+  </header>
+
+  <main>
+    <section class="view active" data-view="wheel">
+      <div class="tool-copy">
+        <span class="tool-kicker">OUTIL SÉLECTIONNÉ</span>
+        <h2 id="selectedName">Photo Métré</h2>
+        <p id="selectedDesc">Coter rapidement une photo sur chantier.</p>
+      </div>
+
+      <div class="wheel-stage" id="wheelStage">
+        <div class="wheel-ring"></div>
+        <div class="wheel" id="wheel" aria-label="Sélecteur d'outils"></div>
+        <button class="wheel-center" id="openTool">
+          <span aria-hidden="true" class="material-symbols-rounded" id="centerIcon">photo_camera</span>
+          <span>Ouvrir</span>
+        </button>
+      </div>
+
+      <div class="wheel-controls"><button id="previousTool" class="icon-btn" aria-label="Outil précédent"><span aria-hidden="true" class="material-symbols-rounded">arrow_back</span></button><button id="nextTool" class="icon-btn" aria-label="Outil suivant"><span aria-hidden="true" class="material-symbols-rounded">chevron_right</span></button></div>
+      <div class="gesture-hint">
+        <span aria-hidden="true" class="material-symbols-rounded">swipe</span>
+        Balayez horizontalement
+      </div>
+    </section>
+
+    <section class="view" data-view="projects">
+      <div class="section-head"><div><span class="eyebrow">DOSSIERS TECHNIQUES</span><h2>Projets</h2></div><button class="icon-btn" data-new-project aria-label="Créer un projet"><span aria-hidden="true" class="material-symbols-rounded">add</span></button></div>
+      <p data-project-storage class="calculation-note"></p>
+      <div data-project-list class="project-list"></div>
+      <details><summary>Sauvegarde et corbeille</summary><button data-backup class="secondary-btn">Exporter une sauvegarde</button><label class="secondary-btn file-button">Importer une sauvegarde<input type="file" data-import-backup accept="application/json,.json"></label><div data-trash-list></div></details>
+    </section>
+
+    <section class="view" data-view="library">
+      <div class="search">
+        <span aria-hidden="true" class="material-symbols-rounded">search</span>
+        <input aria-label="Rechercher un outil" id="searchInput" type="search" placeholder="Rechercher un outil">
+      </div>
+      <button data-reorder-wheel class="secondary-btn">Réorganiser la roue</button><div id="library"></div>
+    </section>
+  </main>
+
+  <p id="offlineStatus" class="app-status" role="status">Préparation du mode hors connexion…</p>
+  <nav class="bottom-nav" aria-label="Navigation principale">
+    <button data-target="projects"><span aria-hidden="true" class="material-symbols-rounded">folder</span><span>Projets</span></button>
+    <button class="active" data-target="wheel"><span aria-hidden="true" class="material-symbols-rounded">tactic</span><span>Roue</span></button>
+    <button data-target="library"><span aria-hidden="true" class="material-symbols-rounded">apps</span><span>Outils</span></button>
+  </nav>
+
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+  <dialog class="bottom-sheet" id="toolSheet" aria-labelledby="sheetName">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close icon-btn" id="sheetClose" aria-label="Fermer"><span aria-hidden="true" class="material-symbols-rounded">close</span></button>
+    <div class="sheet-tool-icon"><span aria-hidden="true" class="material-symbols-rounded" id="sheetIcon">photo_camera</span></div>
+    <span class="eyebrow">PROCHAINEMENT</span>
+    <h2 id="sheetName">Photo Métré</h2>
+    <p id="sheetDesc"></p>
+
+    <p class="prototype-note">Cet outil est prévu pour une prochaine version.</p>
+  </dialog>
+</div>
+<dialog id="bendingTool" class="tool-dialog" aria-labelledby="bendingTitle">
+  <header class="tool-header"><div><span class="eyebrow">CALCULER</span><h2 id="bendingTitle">Cintrage</h2></div><button id="closeBending" class="icon-btn" aria-label="Fermer le cintrage"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></header>
+  <p>Touchez une cote pour la modifier.</p>
+  <div class="technical-diagram">
+    <svg viewBox="0 0 340 240" role="img" aria-label="Arc circulaire : corde horizontale et flèche au centre">
+      <path id="bendingArc" class="arc"/>
+      <path d="M40 175H300 M40 180V225 M300 180V225 M40 215H300" class="construction"/>
+      <path d="m46 211 -6 4 6 4 m248 -8 6 4 -6 4" class="construction"/>
+      <line id="sagittaLine" x1="170" x2="170" y1="136" y2="175" class="dimension"/>
+    </svg>
+    <button data-measurement="chord" class="measurement chord" aria-label="Modifier la corde"><small>CORDE</small><strong id="chordValue"></strong></button>
+    <button data-measurement="sagitta" class="measurement sagitta" aria-label="Modifier la flèche"><small>FLÈCHE</small><strong id="sagittaValue"></strong></button>
+  </div>
+  <div class="result-card" aria-live="polite"><span class="eyebrow">RAYON</span><strong id="radiusValue"></strong><div class="secondary-results"><span>Longueur d’arc<b id="arcValue"></b></span><span>Angle au centre<b id="angleValue"></b></span></div></div>
+  <p class="calculation-note">Arc circulaire mineur · dimensions en mm. La flèche est limitée à la demi-corde.</p>
+  <div class="result-actions"><button data-save class="secondary-btn"><span aria-hidden="true" class="material-symbols-rounded">folder</span>Enregistrer</button><button data-share class="primary-btn"><span aria-hidden="true" class="material-symbols-rounded">share</span>Partager</button></div>
+</dialog>
+<dialog id="slopeTool" class="tool-dialog" aria-labelledby="slopeTitle">
+  <header class="tool-header"><div><span class="eyebrow">CALCULER</span><h2 id="slopeTitle">Pente / Diagonale</h2></div><button id="closeSlope" class="icon-btn" aria-label="Fermer la pente"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></header>
+  <p>Touchez une cote pour la modifier.</p>
+  <div class="technical-diagram">
+    <svg viewBox="0 0 340 240" role="img" aria-label="Triangle rectangle : base horizontale, hauteur et diagonale">
+      <path id="slopeTriangle" class="construction"/>
+      <path id="slopeDiagonal" class="arc"/>
+    </svg>
+    <button data-measurement="run" class="measurement chord" aria-label="Modifier la base horizontale"><small>BASE HORIZONTALE</small><strong id="runValue"></strong></button>
+    <button data-measurement="rise" class="measurement sagitta" aria-label="Modifier la hauteur"><small>HAUTEUR</small><strong id="riseValue"></strong></button>
+  </div>
+  <div class="result-card" aria-live="polite"><span class="eyebrow">DIAGONALE THÉORIQUE</span><strong id="diagonalValue"></strong><div class="secondary-results"><span>Pente<b id="slopePercent"></b></span><span>Angle / horizontale<b id="slopeAngle"></b></span><span>Angle / verticale<b id="complementaryAngle"></b></span></div></div>
+  <p class="calculation-note">Triangle rectangle. Pour contrôler l’équerrage, comparez la diagonale mesurée à la valeur théorique et contrôlez les deux diagonales.</p>
+  <div class="result-actions"><button data-save class="secondary-btn"><span aria-hidden="true" class="material-symbols-rounded">folder</span>Enregistrer</button><button data-share class="primary-btn"><span aria-hidden="true" class="material-symbols-rounded">share</span>Partager</button></div>
+</dialog>
+<dialog id="anglesTool" class="tool-dialog" aria-label="Angles de coupe">
+  <header class="tool-header"><div><span class="eyebrow">OUTIL MÉTIER</span><h2>Angles de coupe</h2></div><button data-close class="icon-btn" aria-label="Fermer Angles de coupe"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></header>
+  <p>Touchez l’angle intérieur de l’assemblage.</p>
+  <div class="technical-diagram"><svg viewBox="-100 0 440 240" role="img" aria-label="Deux pièces réunies par deux coupes égales"><path data-angle-line class="arc"/></svg><button class="measurement chord" data-measurement aria-label="Modifier l’angle intérieur"><small>ANGLE INTÉRIEUR</small><strong data-angle-value></strong></button></div>
+  <div class="result-card" aria-live="polite"><span class="eyebrow">ONGLET DE CHAQUE COUPE</span><strong data-miter></strong><span>Angle par rapport au bord : <b data-half></b></span></div>
+  <p class="calculation-note">Deux coupes égales dans un même plan. Scie à 0° = coupe d’équerre. Sans inclinaison de lame.</p><div class="result-actions"><button data-save class="secondary-btn"><span aria-hidden="true" class="material-symbols-rounded">folder</span>Enregistrer</button><button data-share class="primary-btn"><span aria-hidden="true" class="material-symbols-rounded">share</span>Partager</button></div>
+</dialog>
+<dialog id="spacingTool" class="tool-dialog" aria-label="Répartition">
+  <header class="tool-header"><div><span class="eyebrow">OUTIL MÉTIER</span><h2>Répartition</h2></div><button data-close class="icon-btn" aria-label="Fermer Répartition"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></header><p>Touchez les cotes pour répartir vos éléments.</p>
+  <div class="technical-diagram"><svg viewBox="0 0 340 230" role="img" aria-label="Éléments répartis sur une longueur"><path d="M30 155H310" class="construction"/><g data-slats/></svg><button data-measurement="length" class="measurement chord" aria-label="Modifier longueur disponible"><small>LONGUEUR DISPONIBLE</small><strong data-value="length">1000 mm</strong></button><button data-measurement="width" class="measurement sagitta" aria-label="Modifier largeur élément"><small>LARGEUR ÉLÉMENT</small><strong data-value="width">40 mm</strong></button></div>
+  <div class="count-control"><div><button data-measurement="count" class="measurement " aria-label="Modifier éléments"><small>ÉLÉMENTS</small><strong data-value="count">5</strong></button><p class="calculation-note">Balayez le nombre ou touchez une valeur.</p></div><div data-count-picker></div></div>
+  <label class="check-row"><input type="checkbox" data-end-gaps checked>Espaces égaux aux deux extrémités</label><p role="alert"></p>
+  <div class="result-card" aria-live="polite"><span class="eyebrow">ESPACE LIBRE</span><strong data-gap></strong><span>Entraxe : <b data-pitch></b></span></div>
+  <details><summary>Positions des axes depuis le bord gauche</summary><ol data-axes></ol></details><div class="result-actions"><button data-save class="secondary-btn"><span aria-hidden="true" class="material-symbols-rounded">folder</span>Enregistrer</button><button data-share class="primary-btn"><span aria-hidden="true" class="material-symbols-rounded">share</span>Partager</button></div>
+</dialog>
+<dialog id="photoTool" class="tool-dialog photo-dialog" aria-label="Photo Métré">
+  <header class="tool-header"><div><span class="eyebrow">OUTIL MÉTIER</span><h2>Photo Métré</h2></div><button data-close class="icon-btn" aria-label="Fermer Photo Métré"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></header><p>Touchez une arête proposée, tracez une ligne ou touchez ses deux extrémités, puis saisissez la cote réelle.</p>
+  <div class="photo-import"><label class="secondary-btn file-button"><span aria-hidden="true" class="material-symbols-rounded">photo_camera</span>Prendre une photo<input type="file" accept="image/*" capture="environment"></label><label class="secondary-btn file-button">Importer une photo<input type="file" accept="image/*"></label></div>
+  <p role="alert"></p><details><summary>Arêtes et annotations</summary><label><input type="checkbox" data-show-edges checked>Afficher les arêtes proposées</label><button data-detect class="secondary-btn">Rechercher les arêtes</button><button data-annotate class="secondary-btn">Ajouter une annotation sur la photo</button><div data-annotations></div><label>Notes techniques<textarea data-photo-notes maxlength="2000" aria-label="Notes de la photo"></textarea></label></details><p data-detection-status class="calculation-note">Importez une photo pour rechercher ses arêtes.</p><canvas hidden tabindex="0" aria-label="Photo à coter : toucher deux points ou tracer une ligne"></canvas>
+  <button data-undo class="secondary-btn" disabled><span aria-hidden="true" class="material-symbols-rounded">undo</span>Annuler la dernière cote</button><div data-photo-lines></div>
+  <button data-to-cabinet class="secondary-btn">Envoyer des cotes vers Caisson</button><p class="calculation-note">Les dimensions sont saisies manuellement. La photo ne permet pas de déduire l’échelle réelle.</p><div class="result-actions"><button data-save class="secondary-btn"><span aria-hidden="true" class="material-symbols-rounded">folder</span>Enregistrer</button><button data-share class="primary-btn"><span aria-hidden="true" class="material-symbols-rounded">share</span>Partager</button></div>
+</dialog>
+<dialog id="aretiersTool" class="tool-dialog" aria-label="Arêtiers">
+  <header class="tool-header"><div><span class="eyebrow">OUTIL MÉTIER</span><h2>Arêtiers</h2></div><button data-close class="icon-btn" aria-label="Fermer Arêtiers"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></header><p>Pyramide à base régulière. Touchez une cote pour la modifier.</p>
+  <div class="technical-diagram"><svg viewBox="0 0 340 240" role="img" aria-label="Pyramide et arêtier sélectionné"><g data-pyramid/></svg><button data-measurement="R" class="measurement chord" aria-label="Modifier rayon de base"><small>RAYON DE BASE</small><strong data-value="R">300 mm</strong></button><button data-measurement="H" class="measurement sagitta" aria-label="Modifier hauteur"><small>HAUTEUR</small><strong data-value="H">400 mm</strong></button></div>
+  <div class="measurement-grid"><button data-measurement="n" class="measurement " aria-label="Modifier faces"><small>FACES</small><strong data-value="n">6</strong></button></div>
+  <details><summary>Désaxage et tronquages</summary><div class="measurement-grid"><button data-measurement="dx" class="measurement " aria-label="Modifier désaxage x"><small>DÉSAXAGE X</small><strong data-value="dx">0 mm</strong></button><button data-measurement="dy" class="measurement " aria-label="Modifier désaxage y"><small>DÉSAXAGE Y</small><strong data-value="dy">0 mm</strong></button><button data-measurement="zCut" class="measurement " aria-label="Modifier tronquage 1"><small>TRONQUAGE 1</small><strong data-value="zCut">0 mm</strong></button><button data-measurement="zCut2" class="measurement " aria-label="Modifier tronquage 2"><small>TRONQUAGE 2</small><strong data-value="zCut2">0 mm</strong></button></div><p class="calculation-note">Hauteurs depuis la base. Le tronquage le plus haut définit le haut de la pièce. Désaxages signés en mm.</p></details>
+  <label class="field-label">Arêtier<select data-edge-select aria-label="Arêtier sélectionné"></select></label>
+  <div class="result-card" aria-live="polite"><span class="eyebrow">LONGUEUR D’ARÊTIER</span><strong data-edge-length></strong><div class="secondary-results"><span>Réglage réf. (90° − δ/2)<b data-tool-angle></b></span><span>Biseau réf. (δ/2)<b data-bevel></b></span><span>Angle entre normales δ<b data-delta></b></span><span>Côté de base<b data-base-edge></b></span></div></div>
+  <p class="calculation-note">Conventions du dépôt appcalpi : δ est l’angle entre normales. Dimensions extérieures, sans compensation d’épaisseur ou de trait de scie.</p>
+  <button data-template class="secondary-btn">Gabarit de la face sélectionnée (SVG en mm)</button><div class="result-actions"><button data-save class="secondary-btn"><span aria-hidden="true" class="material-symbols-rounded">folder</span>Enregistrer</button><button data-share class="primary-btn"><span aria-hidden="true" class="material-symbols-rounded">share</span>Partager</button></div>
+</dialog>
+<dialog id="cabinetTool" class="tool-dialog" aria-label="Caisson">
+<header class="tool-header"><div><span class="eyebrow">FABRIQUER</span><h2>Caisson</h2></div><button data-close class="icon-btn" aria-label="Fermer Caisson"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></header><p>Touchez les dimensions extérieures du caisson.</p>
+<div class="technical-diagram"><svg viewBox="0 0 340 240" role="img" aria-label="Caisson avec une tablette, vue de face"><path data-cabinet-shape class="arc"/></svg><button type="button" data-measurement="width" class="measurement chord" aria-label="Modifier largeur"><small>LARGEUR</small><strong data-value="width"></strong></button><button type="button" data-measurement="height" class="measurement sagitta" aria-label="Modifier hauteur"><small>HAUTEUR</small><strong data-value="height"></strong></button></div>
+<div class="measurement-grid"><button type="button" data-measurement="depth" class="measurement " aria-label="Modifier profondeur hors tout"><small>PROFONDEUR HORS TOUT</small><strong data-value="depth"></strong></button><button type="button" data-measurement="thickness" class="measurement " aria-label="Modifier épaisseur panneaux"><small>ÉPAISSEUR PANNEAUX</small><strong data-value="thickness"></strong></button><button type="button" data-measurement="shelves" class="measurement " aria-label="Modifier tablettes"><small>TABLETTES</small><strong data-value="shelves"></strong></button><button type="button" data-measurement="backThickness" class="measurement " aria-label="Modifier épaisseur fond"><small>ÉPAISSEUR FOND</small><strong data-value="backThickness"></strong></button></div>
+<div class="result-card"><span class="eyebrow">DÉBIT DU CAISSON</span><strong data-part-count></strong><ul data-parts></ul></div>
+<p class="calculation-note">Dessus et dessous entre côtés. Fond rapporté inclus dans la profondeur hors tout. Sans façades, jeux de montage ni compensation de chants.</p>
+<button data-to-cutlist class="primary-btn">Envoyer à la liste de débit</button><div class="result-actions"><button data-save class="secondary-btn"><span aria-hidden="true" class="material-symbols-rounded">folder</span>Enregistrer</button><button data-share class="primary-btn"><span aria-hidden="true" class="material-symbols-rounded">share</span>Partager</button></div>
+</dialog>
+<dialog id="cutlistTool" class="tool-dialog" aria-label="Débit et Calpinage">
+<header class="tool-header"><div><span class="eyebrow">FABRIQUER</span><h2>Débit / Calpinage</h2></div><button data-close class="icon-btn" aria-label="Fermer Débit / Calpinage"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></header><p>Une liste de pièces, des panneaux séparés par épaisseur.</p><p data-source-offcut></p><button data-commercial-panels class="secondary-btn" hidden>Revenir aux panneaux commerciaux</button>
+<details><summary>Pièces à débiter</summary><button data-add-piece class="primary-btn"><span aria-hidden="true" class="material-symbols-rounded">add</span>Ajouter une pièce</button><div data-pieces></div></details>
+<details><summary>Format du panneau et trait de scie</summary><div class="measurement-grid"><button type="button" data-panel-measurement="lengthMm" class="measurement " aria-label="Modifier longueur panneau"><small>LONGUEUR PANNEAU</small><strong data-value="lengthMm"></strong></button><button type="button" data-panel-measurement="widthMm" class="measurement " aria-label="Modifier largeur panneau"><small>LARGEUR PANNEAU</small><strong data-value="widthMm"></strong></button><button type="button" data-panel-measurement="sawKerfMm" class="measurement " aria-label="Modifier trait de scie"><small>TRAIT DE SCIE</small><strong data-value="sawKerfMm"></strong></button></div></details>
+<div class="result-card" aria-live="polite"><span class="eyebrow">PANNEAUX NÉCESSAIRES</span><strong data-panel-count></strong><p data-overflow-count></p></div>
+<label class="field-label">Panneau à afficher et exporter en image<select data-panel-select aria-label="Panneau à afficher"></select></label><div data-panels class="technical-diagram"></div><p class="calculation-note">Fil parallèle à la longueur du panneau et de la pièce lorsque sa rotation est interdite. Placement indicatif, sans garantie d’optimum ni séquence de coupe. Les dimensions sont celles à débiter, sans correction de chants.</p>
+<details><summary>Conserver les chutes</summary><p>Rectangles restants de 100 × 100 mm minimum, trait de scie déduit. Contrôlez les dimensions après la coupe. Ne marque pas automatiquement le panneau comme utilisé.</p><button data-save-offcuts class="secondary-btn">Conserver les chutes du panneau affiché</button></details><button data-csv class="secondary-btn">Exporter la liste de débit (CSV)</button><div class="result-actions"><button data-save class="secondary-btn"><span aria-hidden="true" class="material-symbols-rounded">folder</span>Enregistrer</button><button data-share class="primary-btn"><span aria-hidden="true" class="material-symbols-rounded">share</span>Partager</button></div>
+</dialog>
+<dialog id="pieceSheet" class="measurement-sheet" aria-label="Pièce de débit"><form><div class="tool-header"><h2>Pièce de débit</h2><button data-close type="button" class="icon-btn" aria-label="Annuler la pièce"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></div><label class="field-label">Nom<input data-piece-name aria-label="Nom de la pièce" maxlength="80" required></label><div class="measurement-grid"><button type="button" data-measurement="lengthMm" class="measurement " aria-label="Modifier longueur"><small>LONGUEUR</small><strong data-value="lengthMm"></strong></button><button type="button" data-measurement="widthMm" class="measurement " aria-label="Modifier largeur"><small>LARGEUR</small><strong data-value="widthMm"></strong></button><button type="button" data-measurement="thicknessMm" class="measurement " aria-label="Modifier épaisseur"><small>ÉPAISSEUR</small><strong data-value="thicknessMm"></strong></button><button type="button" data-measurement="quantity" class="measurement " aria-label="Modifier quantité"><small>QUANTITÉ</small><strong data-value="quantity"></strong></button></div><label class="check-row"><input data-rotation type="checkbox">Autoriser la rotation (sans contrainte de fil)</label><p role="alert"></p><button type="submit" class="primary-btn">Valider la pièce</button></form></dialog>
+<dialog id="exportSheet" class="measurement-sheet" aria-label="Partager le résultat"><div class="tool-header"><h2>Partager</h2><button data-close class="icon-btn" aria-label="Fermer le partage"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></div><button data-format="text" class="secondary-btn">Texte / copier</button><button data-format="png" class="secondary-btn">Partager l’image (PNG)</button><button data-format="png" data-download="true" class="secondary-btn">Télécharger l’image (PNG)</button><button data-format="pdf" class="secondary-btn">Partager le PDF</button><button data-format="pdf" data-download="true" class="secondary-btn">Télécharger le PDF</button></dialog>
+<dialog id="saveSheet" class="measurement-sheet" aria-label="Enregistrer dans un projet"><div class="tool-header"><h2>Enregistrer</h2><button data-close class="icon-btn" aria-label="Annuler l’enregistrement"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></div><p>Choisissez un dossier sur cet appareil.</p><div data-project-choices></div><button data-create-and-save class="primary-btn">Créer un projet et enregistrer</button></dialog>
+<dialog id="projectNameSheet" class="measurement-sheet" aria-label="Nom du projet"><form><div class="tool-header"><h2>Nom du projet</h2><button type="button" data-close class="icon-btn" aria-label="Annuler le nom du projet"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></div><input aria-label="Nom du projet" maxlength="80" required autocomplete="off"><p role="alert"></p><button type="submit" class="primary-btn">Valider</button></form></dialog>
+<dialog id="projectDetail" class="tool-dialog" aria-label="Dossier technique"><div class="tool-header"><h2>Projet</h2><button data-close class="icon-btn" aria-label="Fermer le projet"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></div><div data-entries></div><details><summary>Notes techniques</summary><p data-project-notes class="technical-notes"></p><button data-edit-notes class="secondary-btn">Modifier les notes</button></details><details><summary>Gérer le dossier</summary><button data-rename-project class="secondary-btn">Renommer</button><button data-delete-project class="secondary-btn">Mettre dans la corbeille</button><div data-restore-entries></div></details></dialog>
+<dialog id="measurementSheet" class="measurement-sheet" aria-labelledby="measurementTitle">
+  <form><div class="tool-header"><h2 id="measurementTitle">Cote (mm)</h2><button type="button" data-close class="icon-btn" aria-label="Annuler"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></div>
+  <input aria-label="Valeur en mm" inputmode="decimal" autocomplete="off" maxlength="120">
+  <p role="alert"></p><div data-thickness-picker hidden></div>
+  <details><summary>Calculer une cote</summary><p>Exemple : 1842 − 2 × 19 = 1804 mm</p><div class="expression-pad"><button type="button" data-key="+">+</button><button type="button" data-key="-">−</button><button type="button" data-key="*">×</button><button type="button" data-key="/">÷</button><button type="button" data-key="(">(</button><button type="button" data-key=")">)</button></div></details>
+  <div class="number-pad"><button type="button" data-key="sign" class="sign-key" aria-label="Changer le signe">±</button>
+    <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button>
+    <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>
+    <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
+    <button type="button" data-key=",">,</button><button type="button" data-key="0">0</button><button type="button" data-key="backspace" aria-label="Effacer le dernier chiffre"><span aria-hidden="true" class="material-symbols-rounded">backspace</span></button>
+  </div><div class="stepper"><button type="button" data-key="minus">−1 mm</button><button type="button" data-key="plus">+1 mm</button></div>
+  <div class="stepper"><button type="button" data-key="minus5">−5</button><button type="button" data-key="plus5">+5</button></div><button type="submit" class="primary-btn">Valider la cote</button></form>
+</dialog>
+<div id="toast" role="status" hidden></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
