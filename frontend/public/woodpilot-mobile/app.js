@@ -1,3 +1,4 @@
+import { createVoiceTool } from './voice-tool.js';
 import { installToolHelp } from './tool-help.js';
 import { keepScreenAwake } from './screen-awake.js';
 import { createHelixTool } from './helix-tool.js';
@@ -24,6 +25,7 @@ import { calculateAretiers } from './aretiers.js';
 import { validatePhoto } from './photo-model.js';
 import { generateCabinet,validateCutList } from './manufacturing.js';
 const catalog=[
+  {id:'voice',name:'Notes vocales',icon:'mic',desc:'Enregistrer et réécouter les rappels de chantier.',cat:'CHANTIER'},
   {id:'helix',name:'Hélicoïdale',icon:'line_curve',desc:'Longueur développée d’une hélice à pas constant.',cat:'CALCULER'},
   {id:'triangle',name:'Pythagore / Trigonométrie',icon:'square_foot',desc:'Calculer les côtés et angles d’un triangle rectangle.',cat:'CALCULER'},
   {id:'level',name:'Niveau / Aplomb',icon:'straighten',desc:'Contrôler le niveau et l’aplomb avec le téléphone.',cat:'MÉTRER'},
@@ -47,7 +49,7 @@ async function share(data) {
   downloadBlob(new Blob([data.text],{type:'text/plain;charset=utf-8'}),'woodpilot-resultat.txt');notify('Résultat téléchargé.');
 }
 const controllers={
-  level:createLevelTool(),helix:createHelixTool({haptic}),triangle:createTriangleTool({haptic}),
+  voice:createVoiceTool({notify}),level:createLevelTool(),helix:createHelixTool({haptic}),triangle:createTriangleTool({haptic}),
   bending:createBendingTool({haptic}),slope:createSlopeTool({haptic}),angles:createAnglesTool({haptic}),
   spacing:createSpacingTool({haptic}),photo:createPhotoTool({notify,haptic,transfer(dimensions){controllers.cabinet.applyDimensions(dimensions);controllers.photo.root.close();openTool('cabinet');}}),aretiers:createAretiersTool({haptic,notify}),
   cutlist:createCutListTool({notify,haptic}),
@@ -63,12 +65,12 @@ function openTool(id){opener=document.activeElement;controllers[id==='nesting'?'
 const projects=createProjectsUI({tools:controllers,openTool,notify});
 Object.entries(controllers).forEach(([id,tool])=>{
   tool.id=id;tool.title=id==='cutlist'?'Débit / Calpinage':catalog.find(item=>item.id===id).name;tool.validate=data=>{if(!data||typeof data!=='object')throw new Error('Résultat invalide.');return validators[id](data);};
-  if(id!=='level')bindResultActions(tool,{save:projects.save,share,notify});
+  if(!['level','voice'].includes(id))bindResultActions(tool,{save:projects.save,share,notify});
   tool.root.onclose=()=>opener?.focus();
   tool.root.querySelectorAll('[data-close],#closeBending,#closeSlope').forEach(button=>button.onclick=()=>tool.root.close());
 });
 document.querySelectorAll('#measurementSheet,#pieceSheet,#projectDetail,#saveSheet,#exportSheet,#projectNameSheet').forEach(dialog=>dialog.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>dialog.close()));
-let favourites=catalog.filter(tool=>!['level','triangle','helix'].includes(tool.id)).slice(0,8).map(tool=>tool.id);
+let favourites=catalog.filter(tool=>!['level','triangle','helix','voice'].includes(tool.id)).slice(0,8).map(tool=>tool.id);
 try{const saved=JSON.parse(localStorage.getItem('woodpilot-tools-favourites'));if(Array.isArray(saved)&&saved.length>=1&&saved.length<=8&&new Set(saved).size===saved.length&&saved.every(id=>catalog.some(tool=>tool.id===id)))favourites=saved;}catch{}
 const favouriteEditor=createFavouritesEditor({catalog,getIds:()=>favourites,onChange(ids){favourites=ids;selected=0;rotation=0;try{localStorage.setItem('woodpilot-tools-favourites',JSON.stringify(ids));}catch{notify('Ordre non conservé sur cet appareil.');}renderWheel();}});
 document.querySelector('[data-reorder-wheel]').onclick=()=>favouriteEditor.open();
