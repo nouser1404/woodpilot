@@ -87,3 +87,7 @@ Son facultatif activé par un bouton : bip bref toutes les deux secondes uniquem
 ### Guidage sonore progressif (remplace la cadence précédente)
 
 Un bip de confirmation est joué dès l’activation. Les bips sont disponibles avant l’alignement : intervalle de 2 s à 10° ou plus, environ 0,85 s à 3°, 0,35 s près du centre, puis 0,25 s après validation d’alignement (son plus aigu). Cadence calculée à partir de l’angle non arrondi, enveloppe sonore courte et volume renforcé. Silence en l’absence de mesure récente, à la fermeture et en arrière-plan. Si le bip de confirmation n’est pas audible, vérifier volume multimédia, sortie Bluetooth et mode silencieux ; le son réel sur smartphone n’est pas validé par les tests automatisés.
+
+### Correctif audio de confirmation
+
+Le rafraîchissement sans mesure ne coupe plus le bip de confirmation. La cadence est réinitialisée indépendamment de l’arrêt du son ; fermeture et arrêt des capteurs interrompent toujours les bips. Sur les navigateurs proposant Audio Session, le mode `playback` est utilisé lors de l’activation pour la compatibilité avec le mode silencieux iOS, puis le mode initial est restauré à la désactivation. Ce mode peut interrompre un autre média sur le téléphone. Deux tests de régression vérifient la non-interruption du bip et la restauration de session. Audibilité physique à confirmer sur le téléphone de l’utilisateur.

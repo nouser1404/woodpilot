@@ -23,7 +23,7 @@ export function createLevelTool(){
   bubble.classList.toggle('aligned',feedback.aligned);
   if(root.open&&!document.hidden)sound.tone(Date.now(),result.angle,feedback.aligned);
  }
- function stop(){active=false;clearInterval(timer);window.removeEventListener('devicemotion',sample);filter=null;filterTime=0;feedback=null;axes=null;render();}
+ function stop(){sound.silence();active=false;clearInterval(timer);window.removeEventListener('devicemotion',sample);filter=null;filterTime=0;feedback=null;axes=null;render();}
  function sample(event){
   if(document.hidden||!root.open)return;
   try{const g=event.accelerationIncludingGravity;
