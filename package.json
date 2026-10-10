@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev:tools": "node scripts/tools-preview.mjs",
-    "test": "node --test frontend/tests/woodpilot-mobile.test.mjs",
+    "test": "node --test frontend/tests/*.test.mjs",
     "check": "npm test",
     "check:full": "npm run check"
   }

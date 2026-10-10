@@ -12,6 +12,8 @@ Vite reste utilisable pour développer le reste de Woodpilot.
 
 ## Fonctions livrées
 
+- Maintien automatique de l’écran allumé lorsque l’application est visible, libération en arrière-plan et réactivation au retour. Statut explicite si le navigateur ou le système le refuse.
+
 - Hélicoïdale : courbe circulaire de rayon et pas constants ; rayon, hauteur, tours (fractions admises), longueur développée, pas, pente et dessin développé.
 
 - Pythagore / Trigonométrie : triangle rectangle, six couples de données connues (deux côtés ou côté/angle), côtés, angles complémentaires, pente, dessin coté et exports.
@@ -23,7 +25,7 @@ Vite reste utilisable pour développer le reste de Woodpilot.
 - Angles : onglets égaux pour assemblage plan, conventions de réglage explicites.
 - Pente / diagonale : triangle rectangle, hauteur nulle autorisée ; comparaison terrain pour vérifier l’équerrage.
 - Répartition : jeux égaux, avec ou sans espaces aux extrémités, positions des axes.
-- Photo Métré : prise/import de photo selon navigateur, tracé manuel, saisie, modification et suppression de cotes. Détection locale des arêtes (Sobel/Hough), sélection tactile, annotations et notes techniques ; transfert explicite des cotes vers Caisson. Images réduites à 1600 px pour le stockage et les exports.
+- Photo Métré : prise/import de photo selon navigateur, tracé manuel, saisie, modification et suppression de cotes. Détection locale des arêtes (Sobel/Hough), sélection tactile, annotations et notes techniques ; transfert explicite des cotes vers Caisson. Mesure calibrée ArUco DICT_4X4_50 ID 0 (carré noir 50 mm), homographie coplanaire, distance connue en repli, points déplaçables et zoom/pan. Photo originale conservée (25 Mo / 32 mégapixels maximum). Voir `docs/mobile/PHOTO_METRE_CALIBRE.md` pour les limites et essais smartphone.
 - Arêtiers : pyramide régulière ou sommet décalé, sections horizontales, longueurs, corroyage et gabarit SVG de face à l’échelle 1:1. Conventions dans `docs/mobile/ARETIERS.md`.
 - Caisson : côtés, dessus/dessous, tablettes et fond appliqué ; transfert des pièces vers la liste de débit. Sans façade, jeu d’assemblage ni correction de chants.
 - Liste de débit / calpinage : noms d’éléments prédéfinis ou libres, chants sur les quatre bords visibles en pointillés après rotation, cotes extérieures sur le plan et le PDF, matériau et nom de projet facultatif ; PDF avec date, occurrences, panneaux, pertes pondérées et liste de débit complète.  pièces, quantités, épaisseurs, rotation autorisée, panneaux, trait de scie et marge de rafraîchissement uniforme sur les quatre bords ; moteur Woodpilot existant. Placement rectangulaire indicatif, sans garantie d’optimum ni ordre de coupe.

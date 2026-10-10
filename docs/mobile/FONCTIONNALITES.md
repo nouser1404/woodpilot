@@ -75,3 +75,11 @@ Triangle rectangle uniquement. Six couples d’entrée : base/hauteur, diagonale
 ## Courbe hélicoïdale
 
 Hypothèse : rayon et pas constants sur la ligne mesurée. Développement horizontal = 2π × rayon × tours ; longueur = hypot(développement horizontal, hauteur) ; pas = hauteur/tours. Fractions de tour positives admises jusqu’à 100 tours, hauteur nulle admise pour un arc plan. Le rayon correspond à la ligne choisie, sans correction de section ou de fabrication. Aucun calcul de marches ou de ligne de foulée dans ce module.
+
+## Écran maintenu allumé — 10 octobre 2026
+
+L’application demande un verrou `screen` dès son ouverture visible. Elle le libère en arrière-plan et le redemande au retour ; un toucher permet de réessayer après un refus du navigateur. Aucun réglage permanent du téléphone n’est modifié. Le statut est visible sous la roue. HTTPS (ou localhost) et un navigateur compatible sont nécessaires ; une batterie faible ou les politiques du système peuvent suspendre le verrou.
+
+## Niveau stabilisé et retour sonore — 10 octobre 2026
+
+Son facultatif activé par un bouton : bip bref toutes les deux secondes uniquement pendant l’alignement stable, arrêt à la fermeture ou en arrière-plan. Affichage arrondi au degré et au mm/m, sans arrondir les calculs. Filtrage du capteur sur 350 ms, petite zone morte sur le déplacement de bulle, validation après 500 ms à ±0,2° ; maintien jusqu’à 0,4° pour éviter les bascules dues au bruit. La bulle se centre pendant l’alignement confirmé. L’affichage 0° seul ne vaut pas validation d’alignement. Le navigateur doit autoriser l’audio à la suite du toucher ; volume et mode silencieux du téléphone restent à vérifier sur appareil réel.

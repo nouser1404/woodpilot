@@ -5,7 +5,7 @@ import path from 'node:path';
 
 // Serve the standalone PWA unchanged: development transforms break offline imports.
 const publicRoot=path.resolve(fileURLToPath(new URL('../frontend/public/',import.meta.url)));
-const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.png':'image/png','.ttf':'font/ttf'};
+const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.pdf':'application/pdf','.png':'image/png','.ttf':'font/ttf'};
 const port=Number(process.env.TOOLS_PORT||5180);
 const server=createServer(async(req,res)=>{
   try {

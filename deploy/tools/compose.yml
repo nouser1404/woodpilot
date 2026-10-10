@@ -1,4 +1,4 @@
-# Service autonome ; connecter au réseau NPM selon README.md.
+# À superposer à la stack production existante pour rejoindre le réseau NPM.
 services:
   tools:
     build:

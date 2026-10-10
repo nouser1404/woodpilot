@@ -53,6 +53,7 @@
   </main>
 
   <p id="offlineStatus" class="app-status" role="status">Préparation du mode hors connexion…</p>
+  <p id="screenAwakeStatus" class="app-status" role="status" aria-live="polite">Activation du maintien de l’écran…</p>
   <nav class="bottom-nav" aria-label="Navigation principale">
     <button data-target="projects"><span aria-hidden="true" class="material-symbols-rounded">folder</span><span>Projets</span></button>
     <button class="active" data-target="wheel"><span aria-hidden="true" class="material-symbols-rounded">tactic</span><span>Roue</span></button>
@@ -123,7 +124,7 @@
   <div class="photo-import"><label class="secondary-btn file-button"><span aria-hidden="true" class="material-symbols-rounded">photo_camera</span>Prendre une photo<input type="file" accept="image/*" capture="environment"></label><label class="secondary-btn file-button">Importer une photo<input type="file" accept="image/*"></label></div>
   <p role="alert"></p><details><summary>Arêtes et annotations</summary><label><input type="checkbox" data-show-edges checked>Afficher les arêtes proposées</label><button data-detect class="secondary-btn">Rechercher les arêtes</button><button data-annotate class="secondary-btn">Ajouter une annotation sur la photo</button><div data-annotations></div><label>Notes techniques<textarea data-photo-notes maxlength="2000" aria-label="Notes de la photo"></textarea></label></details><p data-detection-status class="calculation-note">Importez une photo pour rechercher ses arêtes.</p><canvas hidden tabindex="0" aria-label="Photo à coter : toucher deux points ou tracer une ligne"></canvas>
   <button data-undo class="secondary-btn" disabled><span aria-hidden="true" class="material-symbols-rounded">undo</span>Annuler la dernière cote</button><div data-photo-lines></div>
-  <button data-to-cabinet class="secondary-btn">Envoyer des cotes vers Caisson</button><p class="calculation-note">Les dimensions sont saisies manuellement. La photo ne permet pas de déduire l’échelle réelle.</p><div class="result-actions"><button data-save class="secondary-btn"><span aria-hidden="true" class="material-symbols-rounded">folder</span>Enregistrer</button><button data-share class="primary-btn"><span aria-hidden="true" class="material-symbols-rounded">share</span>Partager</button></div>
+  <button data-to-cabinet class="secondary-btn">Envoyer des cotes vers Caisson</button><p class="calculation-note">En cotation manuelle, saisissez la dimension réelle. En mesure calibrée, mesurez uniquement dans le plan du marqueur.</p><div class="result-actions"><button data-save class="secondary-btn"><span aria-hidden="true" class="material-symbols-rounded">folder</span>Enregistrer</button><button data-share class="primary-btn"><span aria-hidden="true" class="material-symbols-rounded">share</span>Partager</button></div>
 </dialog>
 <dialog id="aretiersTool" class="tool-dialog" aria-label="Arêtiers">
   <header class="tool-header"><div><span class="eyebrow">OUTIL MÉTIER</span><h2>Arêtiers</h2></div><button data-close class="icon-btn" aria-label="Fermer Arêtiers"><span aria-hidden="true" class="material-symbols-rounded">close</span></button></header><p>Pyramide à base régulière. Touchez une cote pour la modifier.</p>
@@ -161,6 +162,7 @@
 <label class="field-label">Contrôle<select data-level-mode aria-label="Mode niveau ou aplomb"><option value="level">Niveau — surface horizontale</option><option value="plumb">Aplomb — élément vertical</option></select></label>
 <p data-level-instructions>Posez le dos du téléphone à plat sur la surface.</p>
 <button data-level-start class="primary-btn">Activer les capteurs</button><p data-level-status role="status"></p>
+<button data-level-sound class="secondary-btn" aria-pressed="false">Activer le son</button><p data-level-sound-status class="calculation-note" role="status">Son désactivé. Valeurs arrondies au degré et au mm/m ; 0° affiché ne signifie pas forcément un alignement validé.</p>
 <div class="technical-diagram"><svg viewBox="0 0 300 300" role="img" aria-label="Bulle de niveau"><circle cx="150" cy="150" r="115" class="level-ring"/><path d="M35 150H265M150 35V265" class="construction"/><circle cx="150" cy="150" r="18" class="level-ring"/><circle data-level-bubble cx="150" cy="150" r="14" hidden class="level-bubble"/></svg></div>
 <div class="result-card"><strong data-level-angle>—</strong><p data-level-offset></p></div><p data-level-reference class="calculation-note"></p>
 <div class="result-actions"><button data-level-calibrate class="secondary-btn">Calibrer le zéro</button><button data-level-reset class="secondary-btn">Référence gravité</button></div>

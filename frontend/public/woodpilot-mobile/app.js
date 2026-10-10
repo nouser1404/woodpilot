@@ -1,3 +1,4 @@
+import { keepScreenAwake } from './screen-awake.js';
 import { createHelixTool } from './helix-tool.js';
 import { calculateHelix } from './helix.js';
 import { createTriangleTool } from './triangle-tool.js';
@@ -125,6 +126,10 @@ appearance.addEventListener('change',syncAppearance);
 window.addEventListener('resize',()=>{if(document.querySelector('[data-view="wheel"]').classList.contains('active'))renderWheel();});
 renderWheel();renderLibrary();
 const offlineStatus=document.querySelector('#offlineStatus');
+keepScreenAwake({onStatus(state){
+  const status=document.querySelector('#screenAwakeStatus');
+  status.textContent=state==='active'?'Écran maintenu allumé':state==='unsupported'?'Maintien de l’écran indisponible dans ce navigateur':state==='unavailable'?'Le navigateur ne permet pas le maintien de l’écran actuellement':'Maintien de l’écran suspendu';
+}});
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').then(async registration=>{const worker=registration.installing||registration.waiting;if(worker&&worker.state!=='activated')await new Promise((resolve,reject)=>{worker.addEventListener('statechange',()=>{if(worker.state==='activated')resolve();if(worker.state==='redundant')reject(new Error('Cache indisponible'));});});await navigator.serviceWorker.ready;}).then(()=>offlineStatus.textContent='Prêt hors connexion · données sur cet appareil').catch(()=>offlineStatus.textContent='Cache hors connexion indisponible dans ce navigateur');
 }else offlineStatus.textContent='Les outils fonctionnent localement ; le cache hors connexion est indisponible.';
