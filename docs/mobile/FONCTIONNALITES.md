@@ -83,3 +83,7 @@ L’application demande un verrou `screen` dès son ouverture visible. Elle le l
 ## Niveau stabilisé et retour sonore — 10 octobre 2026
 
 Son facultatif activé par un bouton : bip bref toutes les deux secondes uniquement pendant l’alignement stable, arrêt à la fermeture ou en arrière-plan. Affichage arrondi au degré et au mm/m, sans arrondir les calculs. Filtrage du capteur sur 350 ms, petite zone morte sur le déplacement de bulle, validation après 500 ms à ±0,2° ; maintien jusqu’à 0,4° pour éviter les bascules dues au bruit. La bulle se centre pendant l’alignement confirmé. L’affichage 0° seul ne vaut pas validation d’alignement. Le navigateur doit autoriser l’audio à la suite du toucher ; volume et mode silencieux du téléphone restent à vérifier sur appareil réel.
+
+### Guidage sonore progressif (remplace la cadence précédente)
+
+Un bip de confirmation est joué dès l’activation. Les bips sont disponibles avant l’alignement : intervalle de 2 s à 10° ou plus, environ 0,85 s à 3°, 0,35 s près du centre, puis 0,25 s après validation d’alignement (son plus aigu). Cadence calculée à partir de l’angle non arrondi, enveloppe sonore courte et volume renforcé. Silence en l’absence de mesure récente, à la fermeture et en arrière-plan. Si le bip de confirmation n’est pas audible, vérifier volume multimédia, sortie Bluetooth et mode silencieux ; le son réel sur smartphone n’est pas validé par les tests automatisés.
