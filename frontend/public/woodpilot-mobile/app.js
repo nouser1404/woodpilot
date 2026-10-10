@@ -34,7 +34,7 @@ const catalog=[
   {id:'angles',name:'Angles',icon:'square_foot',desc:'Onglets égaux pour un assemblage plan.',cat:'CALCULER'},
   {id:'spacing',name:'Répartition',icon:'splitscreen',desc:'Espaces, entraxes et positions des axes.',cat:'FABRIQUER'},
   {id:'cabinet',name:'Caisson',icon:'inventory_2',desc:'Un caisson simple et sa liste de pièces.',cat:'CONCEVOIR'},
-  {id:'slope',name:'Pente / Diagonale',icon:'show_chart',desc:'Pente, diagonale et contrôle d’équerrage.',cat:'CALCULER'},
+  {id:'slope',name:'Pente / Diagonale',icon:'diagonal_line',desc:'Pente, diagonale et contrôle d’équerrage.',cat:'CALCULER'},
   {id:'offcuts',name:'Chutes',icon:'grid_view',desc:'Conserver et réutiliser des panneaux restants.',cat:'FABRIQUER'},
   {id:'cutlist',name:'Liste de débit',icon:'straighten',desc:'Pièces, quantités et export CSV.',cat:'FABRIQUER'},
 ];
@@ -79,13 +79,13 @@ function renderWheel() {
   const tools=wheelTools(),step=360/tools.length,radius=Math.min(165,(stage.clientWidth-72)/2);
   selected=Math.min(selected,tools.length-1);wheel.replaceChildren();
   tools.forEach((tool,index)=>{const angle=(index*step-90)*Math.PI/180,button=document.createElement('button');
-    button.className='tool-node'+(index===selected?' selected':'');button.setAttribute('aria-label',tool.name);button.setAttribute('aria-pressed',String(index===selected));button.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded">${tool.icon}</span>`;
+    button.className='tool-node'+(index===selected?' selected':'');button.setAttribute('aria-label',tool.name);button.setAttribute('aria-pressed',String(index===selected));button.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded${tool.icon==='diagonal_line'?' diagonal-icon':''}">${tool.icon}</span>`;
     button.style.transform=`translate(${Math.cos(angle)*radius}px,${Math.sin(angle)*radius}px) rotate(${-rotation}deg)`;
     let holdTimer;button.onpointerdown=()=>holdTimer=setTimeout(()=>{suppressClick=true;favouriteEditor.open();},650);button.onpointerup=button.onpointercancel=button.onpointerleave=()=>clearTimeout(holdTimer);
     button.onclick=()=>{if(suppressClick)return;select(index);wheel.children[index].focus();};wheel.append(button);
   });
   wheel.style.transform=`rotate(${rotation}deg)`;
-  const tool=tools[selected];document.querySelector('#selectedName').textContent=tool.name;document.querySelector('#selectedDesc').textContent=tool.desc;document.querySelector('#centerIcon').textContent=tool.icon;
+  const tool=tools[selected];document.querySelector('#selectedName').textContent=tool.name;document.querySelector('#selectedDesc').textContent=tool.desc;document.querySelector('#centerIcon').textContent=tool.icon;document.querySelector('#centerIcon').classList.toggle('diagonal-icon',tool.icon==='diagonal_line');
   document.querySelector('#openTool').setAttribute('aria-label',`Ouvrir ${tool.name}`);
 }
 function select(index){const next=(index+favourites.length)%favourites.length;let delta=next-selected;if(delta>favourites.length/2)delta-=favourites.length;if(delta<-favourites.length/2)delta+=favourites.length;rotation-=delta*360/favourites.length;selected=next;haptic();renderWheel();}
@@ -111,7 +111,7 @@ function renderLibrary(filter='') {
   const filtered=catalog.filter(tool=>normalize(tool.name).includes(normalize(filter)));
   if(!filtered.length){root.textContent='Aucun outil trouvé.';return;}
   [...new Set(filtered.map(tool=>tool.cat))].forEach(category=>{const group=document.createElement('section');group.className='library-group';const heading=document.createElement('h3');heading.textContent=category;group.append(heading);
-    filtered.filter(tool=>tool.cat===category).forEach(tool=>{const row=document.createElement('div');row.className='library-item';const open=document.createElement('button');open.className='library-row';open.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded">${tool.icon}</span><span>${tool.name}<small>${tool.desc}</small></span><span aria-hidden="true" class="material-symbols-rounded">chevron_right</span>`;open.onclick=()=>openTool(tool.id);
+    filtered.filter(tool=>tool.cat===category).forEach(tool=>{const row=document.createElement('div');row.className='library-item';const open=document.createElement('button');open.className='library-row';open.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded${tool.icon==='diagonal_line'?' diagonal-icon':''}">${tool.icon}</span><span>${tool.name}<small>${tool.desc}</small></span><span aria-hidden="true" class="material-symbols-rounded">chevron_right</span>`;open.onclick=()=>openTool(tool.id);
       const favourite=document.createElement('button');favourite.className='icon-btn favourite';favourite.innerHTML='<span aria-hidden="true" class="material-symbols-rounded">star</span>';favourite.setAttribute('aria-pressed',String(favourites.includes(tool.id)));favourite.setAttribute('aria-label',`${favourites.includes(tool.id)?'Retirer':'Ajouter'} ${tool.name} ${favourites.includes(tool.id)?'de':'à'} la roue`);favourite.onclick=()=>toggleFavourite(tool.id);row.append(open,favourite);group.append(row);
     });root.append(group);
   });
