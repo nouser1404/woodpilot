@@ -4,10 +4,12 @@ import {createLevelSound} from './level-sound.js';
 export function createLevelTool(){
  const root=document.querySelector('#levelTool'),status=root.querySelector('[data-level-status]'),start=root.querySelector('[data-level-start]'),calibrate=root.querySelector('[data-level-calibrate]');
  let mode='level',axes=null,zero={x:0,y:0},filter=null,active=false,lastSample=0,timer,simulation=false;
- let feedback=null,filterTime=0;
+ let feedback=null,filterTime=0,axis='both';
  const sound=createLevelSound(),soundButton=root.querySelector('[data-level-sound]');
  const show=value=>roundedLevel(value).toLocaleString('fr-FR');
  soundButton.onclick=async()=>{try{if(sound.enabled)sound.disable();else await sound.enable();soundButton.setAttribute('aria-pressed',String(sound.enabled));soundButton.textContent=sound.enabled?'Son activé':'Activer le son';root.querySelector('[data-level-sound-status]').textContent=sound.enabled?'Bips plus rapprochés en approchant du centre ; rapides et plus aigus une fois aligné.':'Son désactivé.';render();}catch(error){root.querySelector('[data-level-sound-status]').textContent=error.message;}};
+ function chooseAxis(value){axis=value;feedback=null;sound.reset();root.querySelectorAll('[data-level-axis]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.levelAxis===axis)));root.querySelector('[data-level-axis-status]').textContent=axis==='both'?'Contrôle des deux axes. Touchez un axe du radar pour l’isoler.':axis==='horizontal'?'Axe horizontal uniquement : gauche / droite. Le dévers vertical est ignoré.':'Axe vertical uniquement : haut / bas. Le dévers horizontal est ignoré.';render();}
+ root.querySelectorAll('[data-level-axis]').forEach(button=>{button.onclick=()=>chooseAxis(button.dataset.levelAxis);if(button.tagName.toLowerCase()==='g')button.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();chooseAxis(button.dataset.levelAxis);}};});
  function render(){
   const fresh=simulation||(active&&Date.now()-lastSample<2000);
   calibrate.disabled=!axes||!fresh;
@@ -15,7 +17,7 @@ export function createLevelTool(){
   root.querySelector('[data-level-reference]').textContent=zero.x||zero.y?'Référence personnalisée : zéro relatif calibré.':'Référence gravité : niveau / aplomb absolu.';
   const bubble=root.querySelector('[data-level-bubble]');bubble.toggleAttribute('hidden',!axes||!fresh);
   if(!axes||!fresh){feedback=null;sound.reset();root.querySelector('[data-level-angle]').textContent='—';root.querySelector('[data-level-offset]').textContent='Aucune mesure disponible';return;}
-  const result=levelReading(axes,zero);
+  const result=levelReading(axes,zero,axis);
   feedback=stabilizeLevel(result,feedback,Date.now());
   root.querySelector('[data-level-angle]').textContent=`${show(result.angle)}°`;
   root.querySelector('[data-level-offset]').textContent=`${feedback.aligned?'Alignement stable':'À ajuster'} · ${result.mmPerMeter===null?'proche de 90°':show(result.mmPerMeter)+' mm/m'}${simulation?' · SIMULATION':''}`;

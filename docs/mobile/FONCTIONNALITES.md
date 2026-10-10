@@ -91,3 +91,7 @@ Un bip de confirmation est joué dès l’activation. Les bips sont disponibles 
 ### Correctif audio de confirmation
 
 Le rafraîchissement sans mesure ne coupe plus le bip de confirmation. La cadence est réinitialisée indépendamment de l’arrêt du son ; fermeture et arrêt des capteurs interrompent toujours les bips. Sur les navigateurs proposant Audio Session, le mode `playback` est utilisé lors de l’activation pour la compatibilité avec le mode silencieux iOS, puis le mode initial est restauré à la désactivation. Ce mode peut interrompre un autre média sur le téléphone. Deux tests de régression vérifient la non-interruption du bip et la restauration de session. Audibilité physique à confirmer sur le téléphone de l’utilisateur.
+
+### Radar du niveau : choix de l’axe
+
+Toucher la ligne horizontale ou verticale sélectionne uniquement cette composante, sans modifier le zéro calibré. La bulle est contrainte à la ligne choisie ; angle, mm/m, validation d’alignement et bips ignorent l’autre composante. L’axe est surligné et nommé sous le radar. Boutons Horizontal, Vertical et Deux axes disponibles également au clavier ; contrôle deux axes par défaut. Test automatisé : dévers de 12° sur l’axe perpendiculaire ignoré, mesure et zéro relatif préservés sur l’axe sélectionné.
