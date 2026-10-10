@@ -46,9 +46,10 @@ export async function canvasPdf(canvas) {
   const jpeg=new Uint8Array(await (await canvasBlob(canvas,'image/jpeg')).arrayBuffer());
   return jpegPdf(jpeg,canvas.width,canvas.height);
 }
-export async function svgImage(svg) {
+export async function svgImage(svg,paper=false) {
   const clone=svg.cloneNode(true),originals=[svg,...svg.querySelectorAll('*')],clones=[clone,...clone.querySelectorAll('*')];
   originals.forEach((node,i)=>{const style=getComputedStyle(node);for(const key of ['fill','stroke','stroke-width','stroke-dasharray','font-family','font-size','text-anchor','dominant-baseline'])clones[i].style.setProperty(key,style.getPropertyValue(key));});
+  if(paper)clones.forEach(node=>{if(node.classList.contains('panel-outline')){node.style.fill='#ffffff';node.style.stroke='#777777';}if(node.classList.contains('slat')){node.style.fill='#f0f0f0';node.style.stroke='#666666';}if(node.classList.contains('piece-label')||node.classList.contains('panel-dimension-label'))node.style.fill='#171919';if(node.classList.contains('panel-dimension'))node.style.stroke='#777777';});
   clone.setAttribute('xmlns','http://www.w3.org/2000/svg');clone.setAttribute('width','1000');clone.setAttribute('height','600');
   const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)],{type:'image/svg+xml'}));
   try {return await loadImage(url);}finally{URL.revokeObjectURL(url);}
@@ -60,23 +61,23 @@ export function textLines(ctx,text,width) {
     out.push(current);return out;
   });
 }
-export async function reportCanvas(text,svg=null) {
+export async function reportCanvas(text,svg=null,paper=false) {
   const canvas=document.createElement('canvas');canvas.width=1200;
   const ctx=canvas.getContext('2d');ctx.font='24px Inter, sans-serif';const lines=textLines(ctx,text,1120);
-  const image=svg?await svgImage(svg):null;
+  const image=svg?await svgImage(svg,paper):null;
   canvas.height=(image?700:120)+lines.length*36;
-  const styles=getComputedStyle(document.documentElement);ctx.fillStyle=styles.getPropertyValue('--color-surface').trim();ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle=styles.getPropertyValue('--color-text').trim();ctx.font='bold 32px Inter, sans-serif';ctx.fillText(lines[0],40,55);
+  const styles=getComputedStyle(document.documentElement);ctx.fillStyle=paper?'#ffffff':styles.getPropertyValue('--color-surface').trim();ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle=paper?'#171919':styles.getPropertyValue('--color-text').trim();ctx.font='bold 32px Inter, sans-serif';ctx.fillText(lines[0],40,55);
   if(image)ctx.drawImage(image,100,80,1000,600);
   ctx.font='24px Inter, sans-serif';lines.slice(1).forEach((line,i)=>ctx.fillText(line,40,(image?730:100)+i*36));
   return canvas;
 }
 export const calculatorCanvas=tool=>reportCanvas(tool.text(),tool.root.querySelector('.technical-diagram svg'));
-export async function reportPages(text,svg=null) {
+export async function reportPages(text,svg=null,paper=false) {
   const ctx=document.createElement('canvas').getContext('2d');ctx.font='24px Inter, sans-serif';
   const lines=textLines(ctx,text,1120),title=lines.shift(),pages=[];let first=true;
-  while(lines.length){const chunk=lines.splice(0,first&&svg?20:28);pages.push(await reportCanvas([title,...chunk].join('\n'),first?svg:null));first=false;}
-  return pages.length?pages:[await reportCanvas(title,svg)];
+  while(lines.length){const chunk=lines.splice(0,first&&svg?20:28);pages.push(await reportCanvas([title,...chunk].join('\n'),first?svg:null,paper));first=false;}
+  return pages.length?pages:[await reportCanvas(title,svg,paper)];
 }
 export async function canvasesPdf(canvases) {
   const pages=[];

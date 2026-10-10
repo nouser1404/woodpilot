@@ -53,3 +53,25 @@ La base `woodpilot-tools-v1` passe en version IndexedDB 2 et ajoute le magasin d
 chutes sans effacer les projets existants. Les sauvegardes V1 sans annotations,
 notes ou chutes restent importables. Les copies de dossiers restent séparées de la
 gestion de l’entreprise et n’appellent aucune route API multi-tenant.
+
+## Calpinage détaillé — 10 octobre 2026
+
+Noms d’éléments identiques à la liste de gestion, sans accès à son API. Chants booléens haut/droite/bas/gauche exprimés avant rotation ; une rotation horaire de 90° transforme leur position sur le dessin. Le matériau est commun à la liste ; les panneaux restent séparés par épaisseur. Le nom de projet est facultatif et repris du dossier lors de l’enregistrement ou de la réouverture s’il est absent. Les anciens résultats restent compatibles. Le PDF comporte récapitulatif, liste de débit et tous les plans cotés ; taux de chute = surface des panneaux moins surface des pièces, trait de scie compris. Les chants ne modifient pas les dimensions brutes à débiter.
+
+Marge de rafraîchissement uniforme : `panel.edgeMarginMm`, 0 mm par défaut pour les anciens résultats. Retrait sur chacun des quatre bords, sans ajout d’un second trait de scie à cette marge ; la marge inclut la bande éliminée. Les placements et rectangles de chutes sont décalés dans le panneau brut, les pertes incluent les bords supprimés, et les bandes retirées ne sont pas récupérées comme chutes. Une marge qui supprime toute la surface utile est refusée.
+
+Apparence automatique : `prefers-color-scheme` au chargement et lors de ses changements. Aucun sélecteur manuel ; les anciennes préférences locales ne sont plus utilisées.
+
+Nouveaux calpinages : trait de scie de 3 mm et marge de 20 mm sur chaque bord par défaut. Réouverture : les valeurs sauvegardées sont conservées ; anciennes sauvegardes sans marge : 0 mm. Réutilisation d’une chute : marge remise à 0 mm, réglable selon son état.
+
+## Niveau / Aplomb
+
+Instrument local indicatif : `devicemotion.accelerationIncludingGravity`, filtrage exponentiel du vecteur, deux angles et écart global par rapport à la gravité. Niveau : normale de la face du téléphone verticale ; aplomb : axe vertical de l’écran parallèle à la gravité. Rotation de l’écran prise en compte, calibration réinitialisée lors de sa rotation ou d’un changement de mode. Alignement affiché à ±0,2°, sans garantie de précision matérielle. Zéro relatif pour une référence choisie. L’écart mm/m vaut 1000 × tan(angle). Les mesures âgées de plus de deux secondes sont masquées ; arrêt à la fermeture et en arrière-plan. Simulation séparée, explicitement affichée, sans valeur présentée comme mesure physique. Pas de sauvegarde de mesures dans cette première version. Capteurs et autorisation à valider sur iOS/Android en HTTPS ; localhost sur ordinateur sert à la simulation.
+
+## Pythagore / Trigonométrie simplifiée
+
+Triangle rectangle uniquement. Six couples d’entrée : base/hauteur, diagonale/base, diagonale/hauteur, base/angle, hauteur/angle, diagonale/angle. α est l’angle entre base et diagonale. Côtés positifs, angle strictement entre 0° et 90°, diagonale supérieure au côté connu, résultats de 0,001 à 1 000 000 mm. Calculs complets sans arrondis intermédiaires ; affichage arrondi. Changer de couple reprend le triangle courant. Sauvegardes, réouverture, texte, image et PDF.
+
+## Courbe hélicoïdale
+
+Hypothèse : rayon et pas constants sur la ligne mesurée. Développement horizontal = 2π × rayon × tours ; longueur = hypot(développement horizontal, hauteur) ; pas = hauteur/tours. Fractions de tour positives admises jusqu’à 100 tours, hauteur nulle admise pour un arc plan. Le rayon correspond à la ligne choisie, sans correction de section ou de fabrication. Aucun calcul de marches ou de ligne de foulée dans ce module.

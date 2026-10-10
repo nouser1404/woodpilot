@@ -8,10 +8,17 @@ Depuis la racine : `npm run dev:tools`.
 Ouvrir http://localhost:5180/woodpilot-mobile/index.html.
 `TOOLS_PORT` permet de choisir un autre port. Le serveur écoute uniquement en local.
 Cet aperçu sert les fichiers sans transformation pour tester le cache PWA.
+Vite reste utilisable pour développer le reste de Woodpilot.
 
 ## Fonctions livrées
 
-- Roue : huit favoris maximum, balayage, boutons précédent/suivant, sélection directe ; bibliothèque avec recherche et favoris persistants, réorganisation par appui long ou boutons Monter/Descendre.
+- Hélicoïdale : courbe circulaire de rayon et pas constants ; rayon, hauteur, tours (fractions admises), longueur développée, pas, pente et dessin développé.
+
+- Pythagore / Trigonométrie : triangle rectangle, six couples de données connues (deux côtés ou côté/angle), côtés, angles complémentaires, pente, dessin coté et exports.
+
+- Niveau / Aplomb : capteurs du téléphone, bulle sur deux axes, écart en degrés et mm/m, zéro relatif et retour à la gravité ; simulation explicitement identifiée sur ordinateur. Accès aux capteurs déclenché par un bouton. Les mesures cessent à la fermeture ou en arrière-plan ; aucune ancienne valeur affichée comme mesure récente. Contrôle réel à effectuer sur téléphone en HTTPS.
+
+- Roue : huit favoris maximum, balayage et sélection directe ; bibliothèque avec recherche et favoris persistants, réorganisation par appui long ou boutons Monter/Descendre.
 - Cintrage : corde/flèche, rayon, arc et angle ; arc circulaire mineur, flèche positive ≤ demi-corde.
 - Angles : onglets égaux pour assemblage plan, conventions de réglage explicites.
 - Pente / diagonale : triangle rectangle, hauteur nulle autorisée ; comparaison terrain pour vérifier l’équerrage.
@@ -19,11 +26,11 @@ Cet aperçu sert les fichiers sans transformation pour tester le cache PWA.
 - Photo Métré : prise/import de photo selon navigateur, tracé manuel, saisie, modification et suppression de cotes. Détection locale des arêtes (Sobel/Hough), sélection tactile, annotations et notes techniques ; transfert explicite des cotes vers Caisson. Images réduites à 1600 px pour le stockage et les exports.
 - Arêtiers : pyramide régulière ou sommet décalé, sections horizontales, longueurs, corroyage et gabarit SVG de face à l’échelle 1:1. Conventions dans `docs/mobile/ARETIERS.md`.
 - Caisson : côtés, dessus/dessous, tablettes et fond appliqué ; transfert des pièces vers la liste de débit. Sans façade, jeu d’assemblage ni correction de chants.
-- Liste de débit / calpinage : pièces, quantités, épaisseurs, rotation autorisée, panneaux et trait de scie ; moteur Woodpilot existant. Placement rectangulaire indicatif, sans garantie d’optimum ni ordre de coupe.
+- Liste de débit / calpinage : noms d’éléments prédéfinis ou libres, chants sur les quatre bords visibles en pointillés après rotation, cotes extérieures sur le plan et le PDF, matériau et nom de projet facultatif ; PDF avec date, occurrences, panneaux, pertes pondérées et liste de débit complète.  pièces, quantités, épaisseurs, rotation autorisée, panneaux, trait de scie et marge de rafraîchissement uniforme sur les quatre bords ; moteur Woodpilot existant. Placement rectangulaire indicatif, sans garantie d’optimum ni ordre de coupe.
 - Chutes : saisie manuelle et récupération des rectangles restants (100 × 100 mm minimum), catalogue local, statut utilisée et corbeille récupérable ; réutilisation d’une chute unique, avec épaisseur et quantité de stock respectées. Les dimensions théoriques doivent être vérifiées après coupe.
 - Dossiers locaux : enregistrement et réouverture des résultats, historique des résultats datés, duplication, notes techniques, renommage, corbeille/restauration ; sauvegarde JSON et import dans de nouveaux dossiers, sans écraser les existants. Les chutes conservent leur identifiant : une réimportation ne recrée pas de stock utilisé.
 - Exports autonomes : texte, PNG et PDF ; CSV pour le débit. Le PDF contient tous les panneaux, l’image le panneau sélectionné. Partage natif lorsqu’il est disponible ; sinon copie/téléchargement.
-- Thèmes clair/sombre, polices locales, pavé numérique avec expressions arithmétiques (+ − × ÷ et parenthèses), ajustements ±1/±5, sélecteurs à crans pour les quantités et épaisseurs (valeur personnalisée autorisée) et installation PWA selon navigateur.
+- Thème clair/sombre automatique selon le navigateur ou le système, polices locales, pavé numérique avec expressions arithmétiques (+ − × ÷ et parenthèses), ajustements ±1/±5, sélecteurs à crans pour les quantités et épaisseurs (valeur personnalisée autorisée) et installation PWA selon navigateur.
 
 ## Hors connexion et données
 

@@ -1,3 +1,8 @@
+import { createHelixTool } from './helix-tool.js';
+import { calculateHelix } from './helix.js';
+import { createTriangleTool } from './triangle-tool.js';
+import { calculateTriangle } from './triangle.js';
+import { createLevelTool } from './level-tool.js';
 import { createOffcutsTool,validateOffcutsSnapshot } from './offcuts-tool.js';
 import { createFavouritesEditor } from './favourites.js';
 import { createBendingTool } from './bending-tool.js';
@@ -17,6 +22,9 @@ import { calculateAretiers } from './aretiers.js';
 import { validatePhoto } from './photo-model.js';
 import { generateCabinet,validateCutList } from './manufacturing.js';
 const catalog=[
+  {id:'helix',name:'Hélicoïdale',icon:'line_curve',desc:'Longueur développée d’une hélice à pas constant.',cat:'CALCULER'},
+  {id:'triangle',name:'Pythagore / Trigonométrie',icon:'square_foot',desc:'Calculer les côtés et angles d’un triangle rectangle.',cat:'CALCULER'},
+  {id:'level',name:'Niveau / Aplomb',icon:'straighten',desc:'Contrôler le niveau et l’aplomb avec le téléphone.',cat:'MÉTRER'},
   {id:'photo',name:'Photo Métré',icon:'photo_camera',desc:'Coter une photo sur chantier.',cat:'MÉTRER'},
   {id:'aretiers',name:'Arêtiers',icon:'architecture',desc:'Pyramides, corroyage et gabarits de faces.',cat:'CALCULER'},
   {id:'nesting',name:'Calpinage',icon:'grid_view',desc:'Placer vos pièces sur les panneaux.',cat:'FABRIQUER'},
@@ -37,6 +45,7 @@ async function share(data) {
   downloadBlob(new Blob([data.text],{type:'text/plain;charset=utf-8'}),'woodpilot-resultat.txt');notify('Résultat téléchargé.');
 }
 const controllers={
+  level:createLevelTool(),helix:createHelixTool({haptic}),triangle:createTriangleTool({haptic}),
   bending:createBendingTool({haptic}),slope:createSlopeTool({haptic}),angles:createAnglesTool({haptic}),
   spacing:createSpacingTool({haptic}),photo:createPhotoTool({notify,haptic,transfer(dimensions){controllers.cabinet.applyDimensions(dimensions);controllers.photo.root.close();openTool('cabinet');}}),aretiers:createAretiersTool({haptic,notify}),
   cutlist:createCutListTool({notify,haptic}),
@@ -46,18 +55,18 @@ controllers.cabinet=createCabinetTool({notify,haptic,transfer(pieces){
   if(controllers.cutlist.hasPieces()&&!confirm('Remplacer la liste de débit actuelle ? Enregistrez-la dans un projet pour la conserver.'))return;
   controllers.cutlist.replacePieces(pieces);controllers.cabinet.root.close();openTool('cutlist');
 }});
-const validators={offcuts:validateOffcutsSnapshot,bending:d=>calculateBending(d.chord,d.sagitta),slope:d=>calculateSlope(d.run,d.rise),angles:d=>calculateMiter(d.angle),spacing:d=>calculateSpacing(d.length,d.width,d.count,d.endGaps),photo:validatePhoto,aretiers:calculateAretiers,cabinet:generateCabinet,cutlist:validateCutList};
+const validators={helix:calculateHelix,triangle:calculateTriangle,offcuts:validateOffcutsSnapshot,bending:d=>calculateBending(d.chord,d.sagitta),slope:d=>calculateSlope(d.run,d.rise),angles:d=>calculateMiter(d.angle),spacing:d=>calculateSpacing(d.length,d.width,d.count,d.endGaps),photo:validatePhoto,aretiers:calculateAretiers,cabinet:generateCabinet,cutlist:validateCutList};
 let opener;
 function openTool(id){opener=document.activeElement;controllers[id==='nesting'?'cutlist':id]?.open();}
 const projects=createProjectsUI({tools:controllers,openTool,notify});
 Object.entries(controllers).forEach(([id,tool])=>{
   tool.id=id;tool.title=id==='cutlist'?'Débit / Calpinage':catalog.find(item=>item.id===id).name;tool.validate=data=>{if(!data||typeof data!=='object')throw new Error('Résultat invalide.');return validators[id](data);};
-  bindResultActions(tool,{save:projects.save,share,notify});
+  if(id!=='level')bindResultActions(tool,{save:projects.save,share,notify});
   tool.root.onclose=()=>opener?.focus();
   tool.root.querySelectorAll('[data-close],#closeBending,#closeSlope').forEach(button=>button.onclick=()=>tool.root.close());
 });
 document.querySelectorAll('#measurementSheet,#pieceSheet,#projectDetail,#saveSheet,#exportSheet,#projectNameSheet').forEach(dialog=>dialog.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>dialog.close()));
-let favourites=catalog.slice(0,8).map(tool=>tool.id);
+let favourites=catalog.filter(tool=>!['level','triangle','helix'].includes(tool.id)).slice(0,8).map(tool=>tool.id);
 try{const saved=JSON.parse(localStorage.getItem('woodpilot-tools-favourites'));if(Array.isArray(saved)&&saved.length>=1&&saved.length<=8&&new Set(saved).size===saved.length&&saved.every(id=>catalog.some(tool=>tool.id===id)))favourites=saved;}catch{}
 const favouriteEditor=createFavouritesEditor({catalog,getIds:()=>favourites,onChange(ids){favourites=ids;selected=0;rotation=0;try{localStorage.setItem('woodpilot-tools-favourites',JSON.stringify(ids));}catch{notify('Ordre non conservé sur cet appareil.');}renderWheel();}});
 document.querySelector('[data-reorder-wheel]').onclick=()=>favouriteEditor.open();
@@ -82,13 +91,11 @@ stage.onpointerdown=event=>{dragging=true;suppressClick=false;startX=event.clien
 stage.onpointerup=event=>{if(!dragging)return;dragging=false;const dx=event.clientX-startX;if(Math.abs(dx)>28){suppressClick=true;select(selected+(dx<0?1:-1));}};
 stage.onpointercancel=stage.onpointerleave=()=>dragging=false;
 wheel.onkeydown=event=>{if(['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();suppressClick=false;select(selected+(event.key==='ArrowRight'?1:-1));wheel.children[selected].focus();}};
-document.querySelector('#previousTool').onclick=()=>{suppressClick=false;select(selected-1);};
-document.querySelector('#nextTool').onclick=()=>{suppressClick=false;select(selected+1);};
 document.querySelector('#openTool').onclick=()=>{if(!suppressClick)openTool(wheelTools()[selected].id);};
 const titles={projects:'Projets',wheel:'Roue',library:'Outils'};
 document.querySelectorAll('.bottom-nav button').forEach(button=>button.onclick=()=>{
   document.querySelectorAll('.bottom-nav button').forEach(item=>{item.classList.toggle('active',item===button);if(item===button)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');});
-  document.querySelectorAll('.view').forEach(view=>view.classList.toggle('active',view.dataset.view===button.dataset.target));document.querySelector('#pageTitle').textContent=titles[button.dataset.target];
+  document.querySelectorAll('.view').forEach(view=>view.classList.toggle('active',view.dataset.view===button.dataset.target));
   if(button.dataset.target==='wheel')renderWheel();if(button.dataset.target==='projects')projects.render();haptic();
 });
 function toggleFavourite(id){
@@ -108,9 +115,13 @@ function renderLibrary(filter='') {
   });
 }
 document.querySelector('#searchInput').oninput=event=>renderLibrary(event.target.value);
-function setTheme(theme){document.documentElement.dataset.theme=theme;document.querySelector('#themeBtn span').textContent=theme==='light'?'dark_mode':'light_mode';document.querySelector('meta[name="theme-color"]').content=getComputedStyle(document.documentElement).getPropertyValue('--color-background').trim();}
-document.querySelector('#themeBtn').onclick=()=>{const theme=document.documentElement.dataset.theme==='light'?'dark':'light';setTheme(theme);try{localStorage.setItem('woodpilot-tools-theme',theme);}catch{}};
-try{if(localStorage.getItem('woodpilot-tools-theme')==='light')setTheme('light');}catch{}
+const appearance=window.matchMedia('(prefers-color-scheme: dark)');
+function syncAppearance(){
+  document.documentElement.dataset.theme=appearance.matches?'dark':'light';
+  document.querySelector('meta[name="theme-color"]').content=getComputedStyle(document.documentElement).getPropertyValue('--color-background').trim();
+}
+syncAppearance();
+appearance.addEventListener('change',syncAppearance);
 window.addEventListener('resize',()=>{if(document.querySelector('[data-view="wheel"]').classList.contains('active'))renderWheel();});
 renderWheel();renderLibrary();
 const offlineStatus=document.querySelector('#offlineStatus');

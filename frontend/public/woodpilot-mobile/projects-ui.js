@@ -40,7 +40,7 @@ export function createProjectsUI({tools,openTool,notify}) {
     project.entries.filter(e=>!e.deletedAt).forEach(entry=>{
       const row=document.createElement('article');row.className='saved-entry';
       const date=new Date(entry.createdAt).toLocaleString('fr-FR');
-      row.append(button(`${entry.title} · ${date}`,async()=>{const tool=tools[entry.toolId];if(!tool)throw new Error('Outil indisponible.');await tool.load(entry.data);detail.close();openTool(entry.toolId);}),
+      row.append(button(`${entry.title} · ${date}`,async()=>{const tool=tools[entry.toolId];if(!tool)throw new Error('Outil indisponible.');await tool.load(entry.data);tool.setProjectName?.(project.name);detail.close();openTool(entry.toolId);}),
         button('Dupliquer',async()=>{await saveEntry(id,{toolId:entry.toolId,title:entry.title,data:entry.data});await showProject(id);}),
         button('Retirer',async()=>{const latest=await getProject(id);const target=latest.entries.find(e=>e.id===entry.id);target.deletedAt=new Date().toISOString();await putProject(latest);await showProject(id);await render();}));
       entries.append(row);
@@ -84,6 +84,7 @@ export function createProjectsUI({tools,openTool,notify}) {
     }catch(error){notify(error.message);}
   }
   async function finishSave(id) {
+    if(savingTool.id==='cutlist'&&!entrySnapshot.projectName){const project=await getProject(id);entrySnapshot.projectName=project.name;savingTool.setProjectName?.(project.name);}
     await saveEntry(id,{toolId:savingTool.id,title:savingTool.title,data:entrySnapshot});saveSheet.close();await render();notify('Résultat enregistré sur cet appareil.');
   }
   saveSheet.querySelector('[data-create-and-save]').onclick=()=>askName(async name=>{const project=newProject(name);await putProject(project);await finishSave(project.id);});

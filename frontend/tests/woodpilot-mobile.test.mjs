@@ -182,3 +182,69 @@ test('Sauvegardes de chutes : réimport sans recréer un stock utilisé',async()
   assert.throws(()=>prepareOffcutImport([original,original]));
   assert.throws(()=>prepareOffcutImport([{...original,id:null}]));
 });
+
+test('Calpinage détaillé : chants après rotation et sauvegardes anciennes',async()=>{
+  const {displayedEdges}=await import('../public/woodpilot-mobile/nesting-details.js');
+  const {validateCutList}=await import('../public/woodpilot-mobile/manufacturing.js');
+  assert.deepEqual(displayedEdges({chantTop:true,rotated:true}),[false,true,false,false]);
+  assert.deepEqual(displayedEdges({chantLeft:true,rotated:true}),[true,false,false,false]);
+  const data={panel:{lengthMm:1000,widthMm:1000,sawKerfMm:4},pieces:[{name:'Porte',lengthMm:500,widthMm:200,thicknessMm:19,quantity:2,allowRotation:true}]};
+  assert.doesNotThrow(()=>validateCutList(data));
+  assert.throws(()=>validateCutList({...data,material:'inconnu'}));
+  assert.throws(()=>validateCutList({...data,pieces:[{...data.pieces[0],chantTop:'oui'}]}));
+});
+test('Rapport calpinage : occurrences, projet, matériau, date et pertes pondérées',async()=>{
+  const {nestingReport}=await import('../public/woodpilot-mobile/nesting-details.js');
+  const {calculateNesting}=await import('../public/woodpilot-mobile/manufacturing.js');
+  const data={projectName:'Cuisine',material:'MDF',panel:{lengthMm:1000,widthMm:1000,sawKerfMm:4},pieces:[{name:'Porte',lengthMm:500,widthMm:200,thicknessMm:19,quantity:2,allowRotation:false,chantTop:true}]};
+  const text=nestingReport(data,calculateNesting(data),new Date(2026,9,10));
+  for(const expected of ['Projet : Cuisine','Matériau : MDF','10/10/2026','2 occurrences','1 panneaux','taux de chute : 80','P1 · 2 occurrence(s) · Porte','Chants : haut'])assert.ok(text.includes(expected),expected);
+});
+
+test('Marge panneau : surface utile, décalage, pertes et chutes sans bord à rafraîchir',async()=>{
+ const {calculateNesting,validateCutList}=await import('../public/woodpilot-mobile/manufacturing.js');
+ const data={panel:{lengthMm:1000,widthMm:600,sawKerfMm:4,edgeMarginMm:10},pieces:[{name:'Tablette',lengthMm:980,widthMm:580,thicknessMm:19,quantity:1,allowRotation:false}]};
+ const result=calculateNesting(data)[0].result;
+ assert.equal(result.panels.length,1);assert.equal(result.panels[0].pieces[0].x,10);assert.equal(result.panels[0].pieces[0].y,10);
+ assert.equal(result.totalPanelAreaMm2,600000);assert.equal(result.totalWasteAreaMm2,31600);
+ assert.equal(result.panels[0].freeRects.length,0);
+ const oversized={...data,pieces:[{...data.pieces[0],lengthMm:981}]};assert.equal(calculateNesting(oversized)[0].result.overflowPieces.length,1);
+ for(const margin of [-1,NaN,Infinity,300])assert.throws(()=>validateCutList({...data,panel:{...data.panel,edgeMarginMm:margin}}));
+ const small={...data,pieces:[{...data.pieces[0],lengthMm:400,widthMm:200}]};
+ for(const rect of calculateNesting(small)[0].result.panels[0].freeRects){assert.ok(rect.x>=10&&rect.y>=10);assert.ok(rect.x+rect.lengthMm<=990&&rect.y+rect.widthMm<=590);}
+ const old={...data,panel:{lengthMm:1000,widthMm:600,sawKerfMm:4}};assert.equal(calculateNesting(old)[0].result.panels[0].pieces[0].x,0);
+});
+
+test('Niveau/aplomb : gravité, angle connu, orientation écran et zéro relatif',async()=>{
+ const {levelAxes,levelReading}=await import('../public/woodpilot-mobile/level-model.js');
+ assert.equal(levelReading(levelAxes({x:0,y:0,z:9.81})).angle,0);
+ assert.equal(levelReading(levelAxes({x:0,y:9.81,z:0},'plumb')).angle,0);
+ const angle=5*Math.PI/180,g={x:9.81*Math.sin(angle),y:0,z:9.81*Math.cos(angle)};
+ assert.ok(Math.abs(levelReading(levelAxes(g)).angle-5)<1e-10);
+ assert.ok(Math.abs(levelReading(levelAxes(g,'level',90)).angle-5)<1e-10);
+ const axes=levelAxes(g);assert.equal(levelReading(axes,axes).angle,0);
+ assert.equal(levelReading({x:90,y:0}).mmPerMeter,null);
+ assert.throws(()=>levelAxes({x:null,y:0,z:9.81}));assert.throws(()=>levelAxes({x:0,y:0,z:0}));
+});
+
+test('Triangle : six combinaisons équivalentes au triangle 3-4-5',async()=>{
+ const {calculateTriangle,TRIANGLE_MODES}=await import('../public/woodpilot-mobile/triangle.js');
+ const expected={adjacent:800,opposite:600,hypotenuse:1000,angle:Math.atan2(600,800)*180/Math.PI};
+ for(const [mode,keys] of Object.entries(TRIANGLE_MODES)){
+  const result=calculateTriangle({mode,...Object.fromEntries(keys.map(key=>[key,expected[key]]))});
+  for(const key of Object.keys(expected))assert.ok(Math.abs(result[key]-expected[key])<1e-8,`${mode} ${key}`);
+ }
+});
+test('Triangle : refus des cas impossibles et absence d’arrondis intermédiaires',async()=>{
+ const {calculateTriangle,triangleText}=await import('../public/woodpilot-mobile/triangle.js');
+ for(const data of [{mode:'hypAdjacent',hypotenuse:500,adjacent:500},{mode:'hypOpposite',hypotenuse:500,opposite:501},{mode:'adjacentAngle',adjacent:500,angle:90},{mode:'legs',adjacent:0,opposite:500},{mode:'other'},{mode:'legs',adjacent:NaN,opposite:4}])assert.throws(()=>calculateTriangle(data));
+ const result=calculateTriangle({mode:'legs',adjacent:123.456,opposite:789.012});assert.equal(result.hypotenuse,Math.hypot(123.456,789.012));
+ assert.match(triangleText({mode:'legs',adjacent:800,opposite:600}),/Diagonale : 1.?000 mm/);
+});
+
+test('Hélice : cercle plan, demi-tour, pas et longueur développée',async()=>{
+ const {calculateHelix}=await import('../public/woodpilot-mobile/helix.js');
+ const circle=calculateHelix({radius:300,height:0,turns:1});assert.equal(circle.length,600*Math.PI);assert.equal(circle.angle,0);
+ const half=calculateHelix({radius:300,height:400,turns:.5});assert.equal(half.pitch,800);assert.equal(half.rotation,180);assert.equal(half.length,Math.hypot(300*Math.PI,400));
+ for(const data of [{radius:0,height:1,turns:1},{radius:1,height:-1,turns:1},{radius:1,height:1,turns:0},{radius:NaN,height:1,turns:1}])assert.throws(()=>calculateHelix(data));
+});
