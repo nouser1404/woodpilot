@@ -7,7 +7,7 @@ export function createLevelTool(){
  let feedback=null,filterTime=0,axis='both';
  const sound=createLevelSound(),soundButton=root.querySelector('[data-level-sound]');
  const show=value=>roundedLevel(value).toLocaleString('fr-FR');
- soundButton.onclick=async()=>{try{if(sound.enabled)sound.disable();else await sound.enable();soundButton.setAttribute('aria-pressed',String(sound.enabled));soundButton.textContent=sound.enabled?'Son activé':'Activer le son';root.querySelector('[data-level-sound-status]').textContent=sound.enabled?'Bips plus rapprochés en approchant du centre ; rapides et plus aigus une fois aligné.':'Son désactivé.';render();}catch(error){root.querySelector('[data-level-sound-status]').textContent=error.message;}};
+ soundButton.onclick=async()=>{soundButton.disabled=true;try{if(sound.enabled)sound.disable();else await sound.enable();soundButton.checked=sound.enabled;root.querySelector('[data-level-sound-status]').textContent=sound.enabled?'Bips plus rapprochés en approchant du centre ; rapides et plus aigus une fois aligné.':'Son désactivé.';render();}catch(error){soundButton.checked=sound.enabled;status.textContent=error.message;}finally{soundButton.disabled=false;}};
  function chooseAxis(value){axis=value;feedback=null;sound.reset();root.querySelectorAll('[data-level-axis]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.levelAxis===axis)));root.querySelector('[data-level-axis-status]').textContent=axis==='both'?'Contrôle des deux axes. Touchez un axe du radar pour l’isoler.':axis==='horizontal'?'Axe horizontal uniquement : gauche / droite. Le dévers vertical est ignoré.':'Axe vertical uniquement : haut / bas. Le dévers horizontal est ignoré.';render();}
  root.querySelectorAll('[data-level-axis]').forEach(button=>{button.onclick=()=>chooseAxis(button.dataset.levelAxis);if(button.tagName.toLowerCase()==='g')button.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();chooseAxis(button.dataset.levelAxis);}};});
  function render(){
@@ -25,7 +25,7 @@ export function createLevelTool(){
   bubble.classList.toggle('aligned',feedback.aligned);
   if(root.open&&!document.hidden)sound.tone(Date.now(),result.angle,feedback.aligned);
  }
- function stop(){sound.silence();active=false;clearInterval(timer);window.removeEventListener('devicemotion',sample);filter=null;filterTime=0;feedback=null;axes=null;render();}
+ function stop(){start.checked=false;sound.silence();active=false;clearInterval(timer);window.removeEventListener('devicemotion',sample);filter=null;filterTime=0;feedback=null;axes=null;render();}
  function sample(event){
   if(document.hidden||!root.open)return;
   try{const g=event.accelerationIncludingGravity;
@@ -33,17 +33,18 @@ export function createLevelTool(){
    const n=Math.hypot(g.x,g.y,g.z);if(n<7||n>12){status.textContent='Gardez le téléphone immobile pour mesurer.';return;}
    const now=Date.now(),weight=filterTime?1-Math.exp(-Math.min(1000,now-filterTime)/350):1;filterTime=now;
    filter=filter?{x:filter.x*(1-weight)+g.x*weight,y:filter.y*(1-weight)+g.y*weight,z:filter.z*(1-weight)+g.z*weight}:{x:g.x,y:g.y,z:g.z};
-   axes=levelAxes(filter,mode,screen.orientation?.angle??0);lastSample=Date.now();status.textContent='Capteur actif — posez le téléphone et attendez la stabilisation.';render();
+   axes=levelAxes(filter,mode,screen.orientation?.angle??0);lastSample=Date.now();status.textContent='Capteurs actifs';render();
   }catch{status.textContent='Mesure du capteur indisponible.';}
  }
  start.onclick=async()=>{
+  if(!start.checked){stop();status.textContent='Capteurs désactivés.';return;}
   stop();simulation=false;root.querySelector('[data-level-demo]').open=false;
   if(!window.isSecureContext){status.textContent='Les capteurs nécessitent HTTPS sur téléphone.';return;}
   if(!window.DeviceMotionEvent){status.textContent='Ce navigateur ne propose pas de capteur de mouvement. La simulation reste disponible.';return;}
-  try{if(typeof DeviceMotionEvent.requestPermission==='function'&&await DeviceMotionEvent.requestPermission()!=='granted'){status.textContent='Accès aux capteurs refusé. Vous pouvez réessayer.';return;}
-   if(!root.open)return;active=true;zero={x:0,y:0};status.textContent='En attente du capteur…';window.addEventListener('devicemotion',sample);
+  try{start.disabled=true;if(typeof DeviceMotionEvent.requestPermission==='function'&&await DeviceMotionEvent.requestPermission()!=='granted'){status.textContent='Accès aux capteurs refusé. Vous pouvez réessayer.';return;}
+   if(!root.open)return;active=true;start.checked=true;zero={x:0,y:0};status.textContent='En attente du capteur…';window.addEventListener('devicemotion',sample);
    timer=setInterval(()=>{if(Date.now()-lastSample>2000)status.textContent='Aucune mesure récente. Vérifiez les capteurs et gardez le téléphone immobile.';render();},100);
-  }catch{status.textContent='Accès aux capteurs impossible dans ce navigateur.';}
+  }catch{status.textContent='Accès aux capteurs impossible dans ce navigateur.';}finally{start.disabled=false;}
  };
  root.querySelector('[data-level-mode]').onchange=event=>{mode=event.target.value;zero={x:0,y:0};axes=null;filter=null;root.querySelector('[data-level-instructions]').textContent=mode==='level'?'Posez le dos du téléphone à plat sur la surface.':'Placez le téléphone debout, son axe vertical parallèle à l’élément à contrôler.';if(simulation)demo();else render();};
  calibrate.onclick=()=>{if(axes&&!calibrate.disabled){zero={...axes};feedback=null;render();}};
@@ -51,7 +52,7 @@ export function createLevelTool(){
  function demo(){if(!root.querySelector('[data-level-demo]').open)return;stop();simulation=true;const inputs=[root.querySelector('[data-demo-x]'),root.querySelector('[data-demo-y]')];if(inputs.some(input=>!input.value||!input.checkValidity())){axes=null;status.textContent='Simulation : saisissez deux angles entre −89° et 89°.';render();return;}axes={x:Number(inputs[0].value),y:Number(inputs[1].value)};status.textContent='SIMULATION — valeurs saisies, aucune mesure réelle.';render();timer=setInterval(render,100);}
  root.querySelector('[data-level-demo]').ontoggle=()=>{if(root.querySelector('[data-level-demo]').open)demo();else if(simulation){simulation=false;axes=null;zero={x:0,y:0};status.textContent='Activez les capteurs pour mesurer.';render();}};
  root.querySelectorAll('[data-demo-x],[data-demo-y]').forEach(input=>input.oninput=demo);
- root.addEventListener('close',()=>{stop();sound.disable();soundButton.setAttribute('aria-pressed','false');soundButton.textContent='Activer le son';root.querySelector('[data-level-sound-status]').textContent='Son désactivé.';simulation=false;zero={x:0,y:0};root.querySelector('[data-level-demo]').open=false;});
+ root.addEventListener('close',()=>{stop();sound.disable();soundButton.checked=false;root.querySelector('[data-level-sound-status]').textContent='Son désactivé.';simulation=false;zero={x:0,y:0};root.querySelector('[data-level-demo]').open=false;});
  screen.orientation?.addEventListener('change',()=>{zero={x:0,y:0};axes=null;filter=null;if(root.open)render();});
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&active){stop();status.textContent='Mesure arrêtée en arrière-plan. Réactivez les capteurs.';}});
  render();return {root,open(){status.textContent='Activez les capteurs pour mesurer.';root.showModal();}};

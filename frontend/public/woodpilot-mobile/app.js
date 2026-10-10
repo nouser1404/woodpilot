@@ -1,3 +1,4 @@
+import { installToolHelp } from './tool-help.js';
 import { keepScreenAwake } from './screen-awake.js';
 import { createHelixTool } from './helix-tool.js';
 import { calculateHelix } from './helix.js';
@@ -124,7 +125,7 @@ function syncAppearance(){
 syncAppearance();
 appearance.addEventListener('change',syncAppearance);
 window.addEventListener('resize',()=>{if(document.querySelector('[data-view="wheel"]').classList.contains('active'))renderWheel();});
-renderWheel();renderLibrary();
+renderWheel();renderLibrary();installToolHelp();
 const offlineStatus=document.querySelector('#offlineStatus');
 keepScreenAwake({onStatus(state){
   const status=document.querySelector('#screenAwakeStatus');

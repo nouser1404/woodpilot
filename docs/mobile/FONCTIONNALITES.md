@@ -95,3 +95,7 @@ Le rafraîchissement sans mesure ne coupe plus le bip de confirmation. La cadenc
 ### Radar du niveau : choix de l’axe
 
 Toucher la ligne horizontale ou verticale sélectionne uniquement cette composante, sans modifier le zéro calibré. La bulle est contrainte à la ligne choisie ; angle, mm/m, validation d’alignement et bips ignorent l’autre composante. L’axe est surligné et nommé sous le radar. Boutons Horizontal, Vertical et Deux axes disponibles également au clavier ; contrôle deux axes par défaut. Test automatisé : dévers de 12° sur l’axe perpendiculaire ignoré, mesure et zéro relatif préservés sur l’axe sélectionné.
+
+### Interface simplifiée
+
+Aide au toucher (icône `help` dans les en-têtes d’outils) pour les explications secondaires, fermeture au toucher extérieur, au clavier Échap ou avec Compris. Erreurs et avertissement permanent Photo Métré conservés. Niveau : interrupteurs Capteurs et Son, états synchronisés en cas de refus ou d’arrêt en arrière-plan. Photo Métré : interrupteur d’affichage des arêtes ; zoom −/+, vue entière et déplacement remplacés par Material Symbols (`zoom_out`, `zoom_in`, `fit_screen`, `pan_tool`), avec nom accessible et titre. L’icône de déplacement indique son état actif.
