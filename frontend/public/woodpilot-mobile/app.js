@@ -94,15 +94,15 @@ stage.onpointerup=event=>{if(!dragging)return;dragging=false;const dx=event.clie
 stage.onpointercancel=stage.onpointerleave=()=>dragging=false;
 wheel.onkeydown=event=>{if(['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();suppressClick=false;select(selected+(event.key==='ArrowRight'?1:-1));wheel.children[selected].focus();}};
 document.querySelector('#openTool').onclick=()=>{if(!suppressClick)openTool(wheelTools()[selected].id);};
-const titles={projects:'Projets',wheel:'Roue',library:'Outils'};
+const titles={projects:'Projets',wheel:'Toolbox',library:'Outils'};
 document.querySelectorAll('.bottom-nav button').forEach(button=>button.onclick=()=>{
   document.querySelectorAll('.bottom-nav button').forEach(item=>{item.classList.toggle('active',item===button);if(item===button)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');});
   document.querySelectorAll('.view').forEach(view=>view.classList.toggle('active',view.dataset.view===button.dataset.target));
   if(button.dataset.target==='wheel')renderWheel();if(button.dataset.target==='projects')projects.render();haptic();
 });
 function toggleFavourite(id){
-  if(favourites.includes(id)){if(favourites.length===1){notify('Conservez au moins un favori sur la roue.');return;}favourites=favourites.filter(value=>value!==id);}
-  else{if(favourites.length===8){notify('La roue accueille 8 favoris. Retirez un outil pour en ajouter un autre.');return;}favourites.push(id);}
+  if(favourites.includes(id)){if(favourites.length===1){notify('Conservez au moins un favori sur la toolbox.');return;}favourites=favourites.filter(value=>value!==id);}
+  else{if(favourites.length===8){notify('La toolbox accueille 8 favoris. Retirez un outil pour en ajouter un autre.');return;}favourites.push(id);}
   selected=0;rotation=0;try{localStorage.setItem('woodpilot-tools-favourites',JSON.stringify(favourites));}catch{notify('Les favoris ne peuvent pas être conservés sur cet appareil.');}
   renderLibrary(document.querySelector('#searchInput').value);
 }
@@ -112,7 +112,7 @@ function renderLibrary(filter='') {
   if(!filtered.length){root.textContent='Aucun outil trouvé.';return;}
   [...new Set(filtered.map(tool=>tool.cat))].forEach(category=>{const group=document.createElement('section');group.className='library-group';const heading=document.createElement('h3');heading.textContent=category;group.append(heading);
     filtered.filter(tool=>tool.cat===category).forEach(tool=>{const row=document.createElement('div');row.className='library-item';const open=document.createElement('button');open.className='library-row';open.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded${tool.icon==='diagonal_line'?' diagonal-icon':''}">${tool.icon}</span><span>${tool.name}<small>${tool.desc}</small></span><span aria-hidden="true" class="material-symbols-rounded">chevron_right</span>`;open.onclick=()=>openTool(tool.id);
-      const favourite=document.createElement('button');favourite.className='icon-btn favourite';favourite.innerHTML='<span aria-hidden="true" class="material-symbols-rounded">star</span>';favourite.setAttribute('aria-pressed',String(favourites.includes(tool.id)));favourite.setAttribute('aria-label',`${favourites.includes(tool.id)?'Retirer':'Ajouter'} ${tool.name} ${favourites.includes(tool.id)?'de':'à'} la roue`);favourite.onclick=()=>toggleFavourite(tool.id);row.append(open,favourite);group.append(row);
+      const favourite=document.createElement('button');favourite.className='icon-btn favourite';favourite.innerHTML='<span aria-hidden="true" class="material-symbols-rounded">star</span>';favourite.setAttribute('aria-pressed',String(favourites.includes(tool.id)));favourite.setAttribute('aria-label',`${favourites.includes(tool.id)?'Retirer':'Ajouter'} ${tool.name} ${favourites.includes(tool.id)?'de':'à'} la toolbox`);favourite.onclick=()=>toggleFavourite(tool.id);row.append(open,favourite);group.append(row);
     });root.append(group);
   });
 }
