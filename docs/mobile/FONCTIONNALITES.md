@@ -99,3 +99,5 @@ Toucher la ligne horizontale ou verticale sélectionne uniquement cette composan
 ### Interface simplifiée
 
 Aide au toucher (icône `help` dans les en-têtes d’outils) pour les explications secondaires, fermeture au toucher extérieur, au clavier Échap ou avec Compris. Erreurs et avertissement permanent Photo Métré conservés. Niveau : interrupteurs Capteurs et Son, états synchronisés en cas de refus ou d’arrêt en arrière-plan. Photo Métré : interrupteur d’affichage des arêtes ; zoom −/+, vue entière et déplacement remplacés par Material Symbols (`zoom_out`, `zoom_in`, `fit_screen`, `pan_tool`), avec nom accessible et titre. L’icône de déplacement indique son état actif.
+
+La police Material Symbols locale contient tous les symboles employés, y compris aide, zoom, vue entière et déplacement. Les ligatures sont activées explicitement et la version de la police est incluse dans le cache hors connexion.

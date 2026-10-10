@@ -31,7 +31,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: url(./font-4.ttf) format('truetype');
+  src: url(./font-4.ttf?v=20261010-icons) format('truetype');
 }
 
 .material-symbols-rounded {
@@ -46,4 +46,6 @@
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
 }
