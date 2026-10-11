@@ -62,3 +62,12 @@ Validation ajoutée : reconnaissance ID 1/150 mm, conservation ID 0/50 mm, refus
 Parcours navigateur contrôlé : import local d’une fixture rasterisée ID 1, détection et confirmation, création de cote entière à l’écran, transfert vers Caisson et liste de pièces recalculée avec la largeur entière. Le PDF rendu est lui-même décodable en ID 1/150 mm. Le dispositif de test local n’est pas livré.
 
 À la réouverture, une ancienne cote refusée par le contrôle de sensibilité est marquée « À recalibrer » et reste éditable ; son ancienne valeur n’est plus affichée, exportée sur le dessin ni proposée au transfert vers Caisson. Les données historiques restent conservées dans le dossier.
+
+## Parcours guidé
+
+1. Choix explicite par carte : Saisie manuelle ou Mesure calibrée, icône accompagnée d’un titre et d’une courte description.
+2. Prendre/importer la photo ; en mode calibré, placement du repère et impression accessibles avant la prise de vue.
+3. Manuel : coter directement, avec consigne de saisie au mètre. Calibré : détecter puis confirmer le contour du repère.
+4. Après confirmation : cotation dans le même plan, zoom et actions de sauvegarde/transfert.
+
+Les commandes secondaires restent masquées avant leur étape. Changer le mode conserve la photo et ses cotes. Changer la photo conserve les données tant qu’un nouvel import n’a pas réussi ; Garder cette photo annule le remplacement. Recalibrer permet de refuser une détection ou de modifier la référence. La réouverture d’un projet reprend directement à la cotation ou à la calibration nécessaire, sans obliger à importer de nouveau. Le titre d’étape reçoit le focus clavier lors d’une transition.
