@@ -1,4 +1,4 @@
-import { calculateBending, formatMeasure, bendingText } from './cintrage.js';
+import { calculateBending, formatMeasure, bendingText, formatAngle } from './cintrage.js';
 import { editMeasurement } from './measurement-input.js';
 
 export function createBendingTool({ share, haptic }) {
@@ -10,7 +10,7 @@ export function createBendingTool({ share, haptic }) {
     root.querySelector('#sagittaValue').textContent = `${formatMeasure(sagitta)} mm`;
     root.querySelector('#radiusValue').textContent = `${formatMeasure(result.radius)} mm`;
     root.querySelector('#arcValue').textContent = `${formatMeasure(result.arcLength)} mm`;
-    root.querySelector('#angleValue').textContent = `${formatMeasure(result.angle)}°`;
+    root.querySelector('#angleValue').textContent = `${formatAngle(result.angle)}°`;
     // Échelle uniforme : la flèche conserve ses proportions avec la corde.
     const height = 260 * sagitta / chord;
     const radius = 260 * result.radius / chord;

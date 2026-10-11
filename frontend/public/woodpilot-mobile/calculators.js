@@ -1,4 +1,4 @@
-import { formatMeasure } from './cintrage.js';
+import { formatMeasure, formatAngle } from './cintrage.js';
 export function calculateMiter(interiorAngle) {
   if (!Number.isFinite(interiorAngle) || interiorAngle <= 0 || interiorAngle >= 180) {
     throw new RangeError('L’angle intérieur doit être compris strictement entre 0° et 180°.');
@@ -20,7 +20,7 @@ export function calculateSpacing(length, width, count, endGaps = true) {
 }
 export function miterText(angle) {
   const result = calculateMiter(angle);
-  return `WoodPilot — Angles de coupe\nAssemblage à deux coupes égales, dans un même plan\nAngle intérieur : ${formatMeasure(angle)}°\nRéglage d’onglet de chaque coupe : ${formatMeasure(result.miter)}°\nRéférence : scie à 0° = coupe d’équerre. Sans inclinaison de lame.\nAngle de chaque coupe par rapport au bord : ${formatMeasure(result.halfAngle)}°`;
+  return `WoodPilot — Angles de coupe\nAssemblage à deux coupes égales, dans un même plan\nAngle intérieur : ${formatAngle(angle)}°\nRéglage d’onglet de chaque coupe : ${formatAngle(result.miter)}°\nRéférence : scie à 0° = coupe d’équerre. Sans inclinaison de lame.\nAngle de chaque coupe par rapport au bord : ${formatAngle(result.halfAngle)}°`;
 }
 export function spacingText(length,width,count,endGaps) {
   const result = calculateSpacing(length,width,count,endGaps);

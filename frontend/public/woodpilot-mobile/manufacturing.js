@@ -46,5 +46,5 @@ export function cutListCsv(data) {
   validateCutList(data);
   const escape=value=>`"${String(value).replaceAll('"','""')}"`;
   const safeName=name=>/^[=+\-@\t\r]/.test(name)?"'"+name:name;
-  return '\uFEFF'+[['Pièce','Longueur (mm)','Largeur (mm)','Épaisseur (mm)','Quantité','Rotation autorisée'],...data.pieces.map(p=>[safeName(p.name),p.lengthMm,p.widthMm,p.thicknessMm,p.quantity,p.allowRotation?'Oui':'Non'])].map(row=>row.map(escape).join(';')).join('\r\n');
+  return '\uFEFF'+[['Pièce','Longueur (mm)','Largeur (mm)','Épaisseur (mm)','Quantité','Rotation autorisée'],...data.pieces.map(p=>[safeName(p.name),Math.round(p.lengthMm),Math.round(p.widthMm),Math.round(p.thicknessMm),p.quantity,p.allowRotation?'Oui':'Non'])].map(row=>row.map(escape).join(';')).join('\r\n');
 }

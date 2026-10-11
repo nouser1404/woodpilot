@@ -12,7 +12,7 @@ Vite reste utilisable pour développer le reste de Woodpilot.
 
 ## Fonctions livrées
 
-- Maintien automatique de l’écran allumé lorsque l’application est visible, libération en arrière-plan et réactivation au retour. Statut explicite si le navigateur ou le système le refuse.
+- Maintien automatique de l’écran allumé lorsque l’application est visible, libération en arrière-plan et réactivation au retour. Messages d’état masqués sur l’accueil.
 
 - Hélicoïdale : courbe circulaire de rayon et pas constants ; rayon, hauteur, tours (fractions admises), longueur développée, pas, pente et dessin développé.
 
@@ -25,7 +25,7 @@ Vite reste utilisable pour développer le reste de Woodpilot.
 - Angles : onglets égaux pour assemblage plan, conventions de réglage explicites.
 - Pente / diagonale : triangle rectangle, hauteur nulle autorisée ; comparaison terrain pour vérifier l’équerrage.
 - Répartition : jeux égaux, avec ou sans espaces aux extrémités, positions des axes.
-- Photo Métré : prise/import de photo selon navigateur, tracé manuel, saisie, modification et suppression de cotes. Détection locale des arêtes (Sobel/Hough), sélection tactile, annotations et notes techniques ; transfert explicite des cotes vers Caisson. Mesure calibrée ArUco DICT_4X4_50 ID 0 (carré noir 50 mm), homographie coplanaire, distance connue en repli, points déplaçables et zoom/pan. Photo originale conservée (25 Mo / 32 mégapixels maximum). Voir `docs/mobile/PHOTO_METRE_CALIBRE.md` pour les limites et essais smartphone.
+- Photo Métré : prise/import de photo selon navigateur, tracé manuel, saisie, modification et suppression de cotes. Détection locale des arêtes (Sobel/Hough), sélection tactile, annotations et notes techniques ; transfert explicite des cotes vers Caisson. Mesure calibrée ArUco DICT_4X4_50 ID 1 (carré noir 150 mm recommandé), ancien ID 0 de 50 mm reconnu, contrôle de sensibilité et refus des cotes instables, homographie coplanaire, distance connue en repli, points déplaçables et zoom/pan. Photo originale conservée (25 Mo / 32 mégapixels maximum). Voir `docs/mobile/PHOTO_METRE_CALIBRE.md` pour les limites et essais smartphone.
 - Arêtiers : pyramide régulière ou sommet décalé, sections horizontales, longueurs, corroyage et gabarit SVG de face à l’échelle 1:1. Conventions dans `docs/mobile/ARETIERS.md`.
 - Caisson : côtés, dessus/dessous, tablettes et fond appliqué ; transfert des pièces vers la liste de débit. Sans façade, jeu d’assemblage ni correction de chants.
 - Liste de débit / calpinage : noms d’éléments prédéfinis ou libres, chants sur les quatre bords visibles en pointillés après rotation, cotes extérieures sur le plan et le PDF, matériau et nom de projet facultatif ; PDF avec date, occurrences, panneaux, pertes pondérées et liste de débit complète.  pièces, quantités, épaisseurs, rotation autorisée, panneaux, trait de scie et marge de rafraîchissement uniforme sur les quatre bords ; moteur Woodpilot existant. Placement rectangulaire indicatif, sans garantie d’optimum ni ordre de coupe.
@@ -36,7 +36,7 @@ Vite reste utilisable pour développer le reste de Woodpilot.
 
 ## Hors connexion et données
 
-Une première visite réussie prépare le cache. Attendre « Prêt hors connexion ».
+Une première visite réussie prépare le cache ; les messages techniques ne sont plus affichés sur l’accueil.
 Calculs, dossiers et exports fonctionnent ensuite localement. Les données restent dans
 le navigateur de cet appareil : elles ne sont ni synchronisées ni transférées à l’ERP.
 Exporter régulièrement une sauvegarde. Un changement de domaine ou d’appareil nécessite
@@ -56,3 +56,5 @@ restent à vérifier sur les téléphones cibles. Impression des gabarits : 100 
 Installation Raspberry/Nginx Proxy Manager préparée dans `deploy/tools/README.md`.
 Le périmètre et les conditions propres au téléphone sont détaillés dans `docs/mobile/FONCTIONNALITES.md`.
 Aucun déploiement distant n’a été effectué.
+
+Affichage : dimensions au millimètre, angles au dixième maximum ; calculs intermédiaires conservés. Transfert Photo Métré vers Caisson arrondi au millimètre.

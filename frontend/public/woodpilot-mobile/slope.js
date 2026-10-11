@@ -1,4 +1,4 @@
-import { formatMeasure } from './cintrage.js';
+import { formatMeasure, formatAngle } from './cintrage.js';
 
 /** Triangle rectangle : base horizontale et hauteur en mm. */
 export function calculateSlope(run, rise) {
@@ -10,5 +10,5 @@ export function calculateSlope(run, rise) {
 }
 export function slopeText(run, rise) {
   const result = calculateSlope(run, rise);
-  return `WoodPilot — Pente / Diagonale\nTriangle rectangle\nBase horizontale : ${formatMeasure(run)} mm\nHauteur : ${formatMeasure(rise)} mm\nDiagonale théorique : ${formatMeasure(result.diagonal)} mm\nPente : ${formatMeasure(result.percent)} %\nAngle par rapport à l’horizontale : ${formatMeasure(result.angle)}°\nAngle par rapport à la verticale : ${formatMeasure(result.complementaryAngle)}°\nPour l’équerrage, comparer la diagonale mesurée à cette valeur théorique et contrôler les deux diagonales.`;
+  return `WoodPilot — Pente / Diagonale\nTriangle rectangle\nBase horizontale : ${formatMeasure(run)} mm\nHauteur : ${formatMeasure(rise)} mm\nDiagonale théorique : ${formatMeasure(result.diagonal)} mm\nPente : ${formatAngle(result.percent)} %\nAngle par rapport à l’horizontale : ${formatAngle(result.angle)}°\nAngle par rapport à la verticale : ${formatAngle(result.complementaryAngle)}°\nPour l’équerrage, comparer la diagonale mesurée à cette valeur théorique et contrôler les deux diagonales.`;
 }

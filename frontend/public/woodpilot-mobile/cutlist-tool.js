@@ -27,7 +27,7 @@ export function createCutListTool({notify,haptic}) {
     if(!data.pieces.length)list.textContent='Ajoutez vos pièces ou envoyez-les depuis Caisson.';
     data.pieces.forEach((piece,index)=>{
       const row=document.createElement('article');row.className='piece-row';
-      const edit=document.createElement('button');edit.className='secondary-btn';edit.textContent=`P${index+1} · ${piece.quantity} × ${piece.name} · ${piece.lengthMm} × ${piece.widthMm} × ${piece.thicknessMm} mm${piece.allowRotation?'':' · fil bloqué'}`;edit.onclick=()=>openPiece(index);
+      const edit=document.createElement('button');edit.className='secondary-btn';edit.textContent=`P${index+1} · ${piece.quantity} × ${piece.name} · ${formatMeasure(piece.lengthMm)} × ${formatMeasure(piece.widthMm)} × ${formatMeasure(piece.thicknessMm)} mm${piece.allowRotation?'':' · fil bloqué'}`;edit.onclick=()=>openPiece(index);
       const remove=document.createElement('button');remove.className='icon-btn';remove.setAttribute('aria-label',`Retirer ${piece.name}`);remove.innerHTML='<span class="material-symbols-rounded">delete</span>';remove.onclick=()=>{data.pieces.splice(index,1);render();};row.append(edit,remove);list.append(row);
     });
     const groups=calculateNesting(data),panels=root.querySelector('[data-panels]');panels.replaceChildren();
@@ -37,22 +37,22 @@ export function createCutListTool({notify,haptic}) {
       total+=group.result.panels.length;overflow+=group.result.overflowPieces.length;
       
       group.result.panels.forEach((panel,index)=>{
-        const option=document.createElement('option');option.value=String(flatIndex++);option.textContent=`Panneau ${index+1} · ${group.thickness} mm`;panelSelect.append(option);
-        const article=document.createElement('article');article.className='nesting-panel';const title=document.createElement('h4');title.textContent=`Panneau ${index+1} · ${group.thickness} mm`;
+        const option=document.createElement('option');option.value=String(flatIndex++);option.textContent=`Panneau ${index+1} · ${formatMeasure(group.thickness)} mm`;panelSelect.append(option);
+        const article=document.createElement('article');article.className='nesting-panel';const title=document.createElement('h4');title.textContent=`Panneau ${index+1} · ${formatMeasure(group.thickness)} mm`;
         const svg=drawNestingPanel(data.panel,panel,title.textContent);
-        const legend=document.createElement('ul');panel.pieces.forEach(p=>{const li=document.createElement('li');li.textContent=`${p.code} · ${p.name} · ${p.originalLengthMm} × ${p.originalWidthMm} mm${p.rotated?' · tourné de 90°':''} · ${edgeDescription(p)}`;legend.append(li);});const stats=document.createElement('p');stats.textContent=`${panel.pieces.length} occurrence(s) · taux de chute ${(100-panel.usedAreaMm2/(data.panel.lengthMm*data.panel.widthMm)*100).toLocaleString('fr-FR',{maximumFractionDigits:1})} % · pointillés orange : chants plaqués${data.panel.edgeMarginMm?` · marge ${data.panel.edgeMarginMm} mm par bord (limite grise), utile ${data.panel.lengthMm-2*data.panel.edgeMarginMm} × ${data.panel.widthMm-2*data.panel.edgeMarginMm} mm`:``}`;article.append(title,stats,svg,legend);panels.append(article);
+        const legend=document.createElement('ul');panel.pieces.forEach(p=>{const li=document.createElement('li');li.textContent=`${p.code} · ${p.name} · ${formatMeasure(p.originalLengthMm)} × ${formatMeasure(p.originalWidthMm)} mm${p.rotated?' · tourné de 90°':''} · ${edgeDescription(p)}`;legend.append(li);});const stats=document.createElement('p');stats.textContent=`${panel.pieces.length} occurrence(s) · taux de chute ${(100-panel.usedAreaMm2/(data.panel.lengthMm*data.panel.widthMm)*100).toLocaleString('fr-FR',{maximumFractionDigits:1})} % · pointillés orange : chants plaqués${data.panel.edgeMarginMm?` · marge ${formatMeasure(data.panel.edgeMarginMm)} mm par bord (limite grise), utile ${formatMeasure(data.panel.lengthMm-2*data.panel.edgeMarginMm)} × ${formatMeasure(data.panel.widthMm-2*data.panel.edgeMarginMm)} mm`:``}`;article.append(title,stats,svg,legend);panels.append(article);
       });
-      group.result.overflowPieces.forEach(p=>{const warning=document.createElement('p');warning.className='nesting-overflow';warning.textContent=`${data.sourceOffcut?'Non placée sur la chute unique':'Hors format'} : ${p.name} · ${p.originalLengthMm} × ${p.originalWidthMm} mm`;panels.append(warning);});
+      group.result.overflowPieces.forEach(p=>{const warning=document.createElement('p');warning.className='nesting-overflow';warning.textContent=`${data.sourceOffcut?'Non placée sur la chute unique':'Hors format'} : ${p.name} · ${formatMeasure(p.originalLengthMm)} × ${formatMeasure(p.originalWidthMm)} mm`;panels.append(warning);});
     }
     activePanel=Math.min(activePanel,Math.max(0,flatIndex-1));panelSelect.value=String(activePanel);
     panels.querySelectorAll('article').forEach((article,i)=>article.hidden=i!==activePanel);panelSelect.disabled=flatIndex===0;
-    root.querySelector('[data-source-offcut]').textContent=data.sourceOffcut?`Chute unique : ${data.sourceOffcut.name} · ${data.sourceOffcut.thicknessMm} mm. Aucun panneau supplémentaire disponible.`:'Panneaux commerciaux';
+    root.querySelector('[data-source-offcut]').textContent=data.sourceOffcut?`Chute unique : ${data.sourceOffcut.name} · ${formatMeasure(data.sourceOffcut.thicknessMm)} mm. Aucun panneau supplémentaire disponible.`:'Panneaux commerciaux';
     root.querySelector('[data-commercial-panels]').hidden=!data.sourceOffcut;
     root.querySelector('[data-panel-count]').textContent=`${total} panneau(x)`;
     root.querySelector('[data-overflow-count]').textContent=!data.pieces.length?'Ajoutez des pièces ou importez celles du caisson.':overflow?`${overflow} pièce(s) ${data.sourceOffcut?'non placée(s) sur cette chute':'hors format'} — plan incomplet`:'Toutes les pièces tiennent dans le format choisi.';
     root.querySelector('[data-overflow-count]').classList.toggle('nesting-overflow',overflow>0);
   }
-  function renderDraft() {for(const key of Object.keys(labels))pieceSheet.querySelector(`[data-value="${key}"]`).textContent=`${draft[key]}${key==='quantity'?'':' mm'}`;}
+  function renderDraft() {for(const key of Object.keys(labels))pieceSheet.querySelector(`[data-value="${key}"]`).textContent=`${formatMeasure(draft[key])}${key==='quantity'?'':' mm'}`;}
   function openPiece(index=null) {
     if(index===null&&data.pieces.length>=100){notify('Maximum : 100 lignes.');return;}
     editingIndex=index;draft=index===null?{name:'Tablette',lengthMm:600,widthMm:400,thicknessMm:19,quantity:1,allowRotation:false}:{...data.pieces[index]};
@@ -77,7 +77,7 @@ export function createCutListTool({notify,haptic}) {
   root.querySelector('[data-csv]').onclick=()=>{downloadBlob(new Blob([cutListCsv(data)],{type:'text/csv;charset=utf-8'}),'woodpilot-liste-debit.csv');notify('Liste de débit CSV téléchargée.');};
   root.querySelector('[data-panel-select]').onchange=event=>{activePanel=Number(event.target.value);render();};
   async function panelCanvas(article,paged=false) {
-    const text=`WoodPilot — Plan détaillé\n${data.projectName?'Projet : '+data.projectName+'\n':''}Matériau : ${data.material||MATERIALS[0]}\nDate : ${new Date().toLocaleDateString('fr-FR')}\n${article.querySelector('h4').textContent}\n${article.querySelector('p').textContent}\nPanneau ${data.panel.lengthMm} × ${data.panel.widthMm} mm · trait de scie ${data.panel.sawKerfMm} mm\nMarge : ${data.panel.edgeMarginMm??0} mm sur chaque bord\n${data.sourceOffcut?'Chute unique : '+data.sourceOffcut.name:'Panneaux commerciaux'}\n${root.querySelector('[data-overflow-count]').textContent}\n${[...article.querySelectorAll('li')].map(li=>li.textContent).join('\n')}\nPlan indicatif, sans séquence de coupe. Fil bloqué : pièce parallèle à la longueur du panneau.`;
+    const text=`WoodPilot — Plan détaillé\n${data.projectName?'Projet : '+data.projectName+'\n':''}Matériau : ${data.material||MATERIALS[0]}\nDate : ${new Date().toLocaleDateString('fr-FR')}\n${article.querySelector('h4').textContent}\n${article.querySelector('p').textContent}\nPanneau ${formatMeasure(data.panel.lengthMm)} × ${formatMeasure(data.panel.widthMm)} mm · trait de scie ${formatMeasure(data.panel.sawKerfMm)} mm\nMarge : ${formatMeasure(data.panel.edgeMarginMm??0)} mm sur chaque bord\n${data.sourceOffcut?'Chute unique : '+data.sourceOffcut.name:'Panneaux commerciaux'}\n${root.querySelector('[data-overflow-count]').textContent}\n${[...article.querySelectorAll('li')].map(li=>li.textContent).join('\n')}\nPlan indicatif, sans séquence de coupe. Fil bloqué : pièce parallèle à la longueur du panneau.`;
     return paged?reportPages(text,article.querySelector('svg'),true):reportCanvas(text,article.querySelector('svg'),true);
   }
   render();

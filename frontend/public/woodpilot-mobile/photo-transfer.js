@@ -1,4 +1,9 @@
 import { formatMeasure } from './cintrage.js';
+export function roundedPhotoDimension(value){
+  const rounded=Math.round(value);
+  if(!Number.isFinite(value)||rounded<1||rounded>100000)throw new RangeError('La cote arrondie doit être comprise entre 1 et 100 000 mm.');
+  return rounded;
+}
 export function choosePhotoDimensions(lines,onConfirm) {
   if(!lines.length)throw new Error('Ajoutez au moins une cote à la photo.');
   const dialog=document.createElement('dialog');dialog.className='measurement-sheet';
@@ -13,6 +18,6 @@ export function choosePhotoDimensions(lines,onConfirm) {
   const error=document.createElement('p');error.setAttribute('role','alert');form.append(error);
   const send=document.createElement('button');send.type='submit';send.className='primary-btn';send.textContent='Appliquer au caisson';
   const cancel=document.createElement('button');cancel.type='button';cancel.className='secondary-btn';cancel.textContent='Annuler';cancel.onclick=()=>dialog.close();form.append(send,cancel);
-  form.onsubmit=event=>{event.preventDefault();try{const dimensions={};for(const [key,select] of Object.entries(selects))if(select.value!=='')dimensions[key]=lines[Number(select.value)].value;if(!Object.keys(dimensions).length)throw new Error('Associez au moins une dimension.');onConfirm(dimensions);dialog.close();}catch(reason){error.textContent=reason.message;}};
+  form.onsubmit=event=>{event.preventDefault();try{const dimensions={};for(const [key,select] of Object.entries(selects))if(select.value!=='')dimensions[key]=roundedPhotoDimension(lines[Number(select.value)].value);if(!Object.keys(dimensions).length)throw new Error('Associez au moins une dimension.');onConfirm(dimensions);dialog.close();}catch(reason){error.textContent=reason.message;}};
   dialog.append(form);document.body.append(dialog);dialog.onclose=()=>dialog.remove();dialog.showModal();
 }

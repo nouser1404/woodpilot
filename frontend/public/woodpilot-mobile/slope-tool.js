@@ -1,5 +1,5 @@
 import { calculateSlope, slopeText } from './slope.js';
-import { formatMeasure } from './cintrage.js';
+import { formatMeasure, formatAngle } from './cintrage.js';
 import { editMeasurement } from './measurement-input.js';
 
 export function createSlopeTool({ share, haptic }) {
@@ -10,9 +10,9 @@ export function createSlopeTool({ share, haptic }) {
     root.querySelector('#runValue').textContent = `${formatMeasure(run)} mm`;
     root.querySelector('#riseValue').textContent = `${formatMeasure(rise)} mm`;
     root.querySelector('#diagonalValue').textContent = `${formatMeasure(result.diagonal)} mm`;
-    root.querySelector('#slopePercent').textContent = `${formatMeasure(result.percent)} %`;
-    root.querySelector('#slopeAngle').textContent = `${formatMeasure(result.angle)}°`;
-    root.querySelector('#complementaryAngle').textContent = `${formatMeasure(result.complementaryAngle)}°`;
+    root.querySelector('#slopePercent').textContent = `${formatAngle(result.percent)} %`;
+    root.querySelector('#slopeAngle').textContent = `${formatAngle(result.angle)}°`;
+    root.querySelector('#complementaryAngle').textContent = `${formatAngle(result.complementaryAngle)}°`;
     const scale = Math.min(240 / run, 140 / Math.max(rise, 1));
     const x = 40 + run * scale, y = 175 - rise * scale;
     root.querySelector('#slopeTriangle').setAttribute('d', `M40 175H${x}V${y}`);

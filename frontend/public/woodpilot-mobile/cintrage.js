@@ -14,9 +14,10 @@ export function calculateBending(chord, sagitta) {
   return { radius, arcLength: radius * radians, angle: radians * 180 / Math.PI };
 }
 export const formatMeasure = value => new Intl.NumberFormat('fr-FR', {
-  maximumFractionDigits: 1,
+  maximumFractionDigits: 0,
 }).format(value);
+export const formatAngle = value => new Intl.NumberFormat('fr-FR', {maximumFractionDigits: 1}).format(value);
 export function bendingText(chord, sagitta) {
   const result = calculateBending(chord, sagitta);
-  return `WoodPilot — Cintrage (arc circulaire mineur)\nCorde : ${formatMeasure(chord)} mm\nFlèche : ${formatMeasure(sagitta)} mm\nRayon : ${formatMeasure(result.radius)} mm\nLongueur d’arc : ${formatMeasure(result.arcLength)} mm\nAngle au centre : ${formatMeasure(result.angle)}°`;
+  return `WoodPilot — Cintrage (arc circulaire mineur)\nCorde : ${formatMeasure(chord)} mm\nFlèche : ${formatMeasure(sagitta)} mm\nRayon : ${formatMeasure(result.radius)} mm\nLongueur d’arc : ${formatMeasure(result.arcLength)} mm\nAngle au centre : ${formatAngle(result.angle)}°`;
 }

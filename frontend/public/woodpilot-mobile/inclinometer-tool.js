@@ -8,7 +8,7 @@ export function createInclinometerTool({haptic}){
   const sensors=root.querySelector('[data-sensors]'),auto=root.querySelector('[data-auto]'),soundSwitch=root.querySelector('[data-sound]'),status=root.querySelector('[data-status]'),error=root.querySelector('[data-error]'),capture=root.querySelector('[data-capture]');
   const sound=createLevelSound();let live=null,held=null,lastSample=0,filter=null,filterTime=0,stability=null,armedAt=null,timer;
   const sensor=createGravitySensor({canRun:()=>root.open&&!document.hidden,onStatus:text=>status.textContent=text,onSample:sample});
-  const show=value=>value.toLocaleString('fr-FR',{maximumFractionDigits:1,minimumFractionDigits:1});
+  const show=value=>value.toLocaleString('fr-FR',{maximumFractionDigits:1});
   const fresh=()=>sensor.active&&live!==null&&Date.now()-lastSample<1000;
   function render(){
     const result=held?slopeFromAngle(held.angle):fresh()?slopeFromAngle(live):null;

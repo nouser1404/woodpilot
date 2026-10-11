@@ -1,4 +1,4 @@
-import { formatMeasure } from './cintrage.js';
+import { formatMeasure, formatAngle } from './cintrage.js';
 // Conventions métier de nouser1404/appcalpi/Aretiers, référence documentée dans docs/mobile/ARETIERS.md.
 const sub=(a,b)=>a.map((v,i)=>v-b[i]);
 const dot=(a,b)=>a.reduce((sum,v,i)=>sum+v*b[i],0);
@@ -37,5 +37,5 @@ export function templateSvg(data,index) {
 }
 export function aretiersText(data) {
   const model=calculateAretiers(data);
-  return `WoodPilot — Arêtiers\nPyramide à base régulière de ${data.n} faces\nRayon aux sommets : ${formatMeasure(data.R)} mm\nHauteur du sommet : ${formatMeasure(data.H)} mm\nDésaxage X / Y : ${formatMeasure(data.dx)} / ${formatMeasure(data.dy)} mm\nTronquages : ${formatMeasure(data.zCut)} / ${formatMeasure(data.zCut2)} mm\nCôté de base : ${formatMeasure(model.baseEdge)} mm\n${model.items.map(item=>`Arêtier ${item.index+1} : longueur ${formatMeasure(item.cutLength)} mm ; δ ${formatMeasure(item.delta)}° ; δ/2 ${formatMeasure(item.bevelFace)}° ; 90° − δ/2 ${formatMeasure(item.bevelTool)}°`).join('\n')}\nδ = angle entre normales, convention du dépôt appcalpi.\nBiseau de référence = δ/2 ; réglage outil de référence = 90° − δ/2.\nDimensions extérieures, sans compensation d’épaisseur ni trait de scie.`;
+  return `WoodPilot — Arêtiers\nPyramide à base régulière de ${data.n} faces\nRayon aux sommets : ${formatMeasure(data.R)} mm\nHauteur du sommet : ${formatMeasure(data.H)} mm\nDésaxage X / Y : ${formatMeasure(data.dx)} / ${formatMeasure(data.dy)} mm\nTronquages : ${formatMeasure(data.zCut)} / ${formatMeasure(data.zCut2)} mm\nCôté de base : ${formatMeasure(model.baseEdge)} mm\n${model.items.map(item=>`Arêtier ${item.index+1} : longueur ${formatMeasure(item.cutLength)} mm ; δ ${formatAngle(item.delta)}° ; δ/2 ${formatAngle(item.bevelFace)}° ; 90° − δ/2 ${formatAngle(item.bevelTool)}°`).join('\n')}\nδ = angle entre normales, convention du dépôt appcalpi.\nBiseau de référence = δ/2 ; réglage outil de référence = 90° − δ/2.\nDimensions extérieures, sans compensation d’épaisseur ni trait de scie.`;
 }

@@ -1,6 +1,6 @@
 import { calibrationUI } from './photo-calibrated-ui.js';
 import { photoViewport } from './photo-viewport.js';
-import { PHOTO_WARNING, calibratedDistance } from './photo-calibration.js';
+import { PHOTO_WARNING, calibratedDistance, recalculatePhotoLines } from './photo-calibration.js';
 import { closestSegment } from './edge-detection.js';
 import { editText } from './text-input.js';
 import { choosePhotoDimensions } from './photo-transfer.js';
@@ -10,6 +10,7 @@ import { normalizedPoint,validatePhoto } from './photo-model.js';
 import { formatMeasure } from './cintrage.js';
 export function createPhotoTool({notify,haptic,transfer}) {
   const root=document.querySelector('#photoTool'),canvas=root.querySelector('canvas');
+  root.querySelector('.result-actions').hidden=true;
   let image=null,imageData='',lines=[],pending=null,dragStart=null,selectedSegment=null,annotations=[],notes='',segments=[],annotationMode=false,generation=0;
   let moving=null;
   const viewport=photoViewport(canvas,()=>{dragStart=null;moving=null;});
@@ -22,6 +23,7 @@ export function createPhotoTool({notify,haptic,transfer}) {
   const error=root.querySelector('[role="alert"]');
   function render() {
     if(!image)return;
+    root.querySelector('.result-actions').hidden=false;
     canvas.width=image.width;canvas.height=image.height;
     const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);
     const styles=getComputedStyle(document.documentElement),color=styles.getPropertyValue('--color-measurement').trim();
@@ -40,7 +42,7 @@ export function createPhotoTool({notify,haptic,transfer}) {
     }
     if(root.querySelector('[data-show-edges]').checked){ctx.save();ctx.strokeStyle=styles.getPropertyValue('--color-construction-line').trim();ctx.lineWidth=2*scale;ctx.setLineDash([5*scale,4*scale]);segments.forEach(line=>{ctx.beginPath();ctx.moveTo(line.a.x*canvas.width,line.a.y*canvas.height);ctx.lineTo(line.b.x*canvas.width,line.b.y*canvas.height);ctx.stroke();});ctx.restore();}
     if(selectedSegment)segment(selectedSegment.a,selectedSegment.b);
-    lines.forEach(line=>segment(line.a,line.b,line.value));
+    lines.forEach(line=>segment(line.a,line.b,line.unreliable?undefined:line.value));
     const outline=calibrated.outline;
     if(outline?.type==='aruco'){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=4*scale;ctx.beginPath();outline.corners.forEach((p,i)=>{const x=p.x*canvas.width,y=p.y*canvas.height;if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);ctx.fillStyle=color;ctx.fillRect(x-5*scale,y-5*scale,10*scale,10*scale);});ctx.closePath();ctx.stroke();ctx.restore();}
     if(selectedSegment){for(const [label,p] of [['A',selectedSegment.a],['B',selectedSegment.b]]){ctx.fillStyle=color;ctx.textAlign='left';ctx.fillText(label,p.x*canvas.width+8*scale,p.y*canvas.height-8*scale);}}
@@ -50,7 +52,7 @@ export function createPhotoTool({notify,haptic,transfer}) {
     const list=root.querySelector('[data-photo-lines]');list.replaceChildren();
     lines.forEach((line,index)=>{
       const row=document.createElement('div');row.className='photo-line-row';
-      const edit=document.createElement('button');edit.className='secondary-btn';edit.textContent=`Cote ${index+1} · ${formatMeasure(line.value)} mm`;
+      const edit=document.createElement('button');edit.className='secondary-btn';edit.textContent=`Cote ${index+1} · ${line.unreliable?'À recalibrer':formatMeasure(line.value)+' mm'}`;
       edit.onclick=()=>{if(line.source){selectedSegment=line;render();notify('Déplacez A ou B sur la photo pour ajuster cette cote.');return;}editMeasurement({label:`Cote ${index+1}`,value:line.value,trigger:edit,onConfirm(value){line.value=value;render();}});};
       const remove=document.createElement('button');remove.className='icon-btn';remove.setAttribute('aria-label',`Supprimer la cote ${index+1}`);remove.innerHTML='<span class="material-symbols-rounded" aria-hidden="true">delete</span>';
       remove.onclick=()=>{if(selectedSegment===line)selectedSegment=null;lines.splice(index,1);render();};row.append(edit,remove);list.append(row);
@@ -86,11 +88,11 @@ export function createPhotoTool({notify,haptic,transfer}) {
   root.querySelector('[data-detect]').onclick=detect;root.querySelector('[data-show-edges]').onchange=render;
   root.querySelector('[data-photo-notes]').oninput=event=>notes=event.target.value;
   root.querySelector('[data-annotate]').onclick=()=>{if(!image){notify('Importez une photo.');return;}annotationMode=true;notify('Touchez la position de l’annotation.');};
-  root.querySelector('[data-to-cabinet]').onclick=()=>{try{choosePhotoDimensions(lines,transfer);}catch(reason){notify(reason.message);}};
+  root.querySelector('[data-to-cabinet]').onclick=()=>{try{choosePhotoDimensions(lines.filter(line=>!line.unreliable),transfer);}catch(reason){notify(reason.message);}};
   canvas.onpointerdown=event=>{if(!image)return;dragStart=point(event);moving=null;
     if(selectedSegment?.source){const rect=canvas.getBoundingClientRect();for(const key of ['a','b'])if(Math.hypot((selectedSegment[key].x-dragStart.x)*rect.width,(selectedSegment[key].y-dragStart.y)*rect.height)<24)moving={line:selectedSegment,key,previous:{...selectedSegment[key]}};}
     canvas.setPointerCapture(event.pointerId);};
-  canvas.onpointermove=event=>{if(!moving)return;const p=point(event);try{const value=calibratedDistanceForLine(moving.line,moving.key,p);moving.line[moving.key]=p;moving.line.value=value;render();}catch{}};
+  canvas.onpointermove=event=>{if(!moving)return;const p=point(event);try{const value=calibratedDistanceForLine(moving.line,moving.key,p);moving.line[moving.key]=p;moving.line.value=value;delete moving.line.unreliable;render();}catch{}};
   function calibratedDistanceForLine(line,key,p){return calibratedDistance(line.calibration,key==='a'?p:line.a,key==='b'?p:line.b,image.width,image.height);}
   canvas.onpointerup=event=>{
     if(moving){moving=null;dragStart=null;return;}
@@ -105,8 +107,8 @@ export function createPhotoTool({notify,haptic,transfer}) {
   canvas.onkeydown=event=>{if(event.key==='Escape'){pending=null;selectedSegment=null;render();}};
   root.querySelector('[data-undo]').onclick=()=>{if(pending)pending=null;else{const line=lines.pop();if(selectedSegment===line)selectedSegment=null;}render();};
   return {root,open(){root.showModal();},snapshot(){if(!imageData)throw new Error('Importez une photo avant de l’enregistrer.');return {image:imageData,lines:structuredClone(lines),annotations:structuredClone(annotations),notes,calibration:calibrated.calibration,mode:calibrated.mode};},
-    async load(data){validatePhoto(data);const next=await loadImage(data.image);imageData=data.image;image=next;lines=structuredClone(data.lines);annotations=structuredClone(data.annotations||[]);notes=data.notes||'';root.querySelector('[data-photo-notes]').value=notes;pending=null;canvas.hidden=false;viewport.reset();calibrated.load(data.calibration,data.mode);for(const line of lines)if(line.source)line.value=calibratedDistance(line.calibration,line.a,line.b,image.width,image.height);render();detect();},
-    text(){return `WoodPilot — Photo Métré\n${calibrated.provenance()}\n${PHOTO_WARNING}\n${lines.map((line,i)=>`Cote ${i+1} : ${formatMeasure(line.value)} mm (${line.source==='aruco'?'ArUco, coplanaire':line.source?'distance connue, approximative':'saisie manuelle'})`).join('\n')}\n${annotations.map(note=>note.text).join('\n')}\n${notes}`;},
+    async load(data){validatePhoto(data);const next=await loadImage(data.image);imageData=data.image;image=next;lines=structuredClone(data.lines);annotations=structuredClone(data.annotations||[]);notes=data.notes||'';root.querySelector('[data-photo-notes]').value=notes;pending=null;canvas.hidden=false;viewport.reset();calibrated.load(data.calibration,data.mode);lines=recalculatePhotoLines(lines,image.width,image.height);if(lines.some(line=>line.unreliable))notify('Certaines anciennes cotes sont trop instables : recalibrez-les avant utilisation.');render();detect();},
+    text(){return `WoodPilot — Photo Métré\n${calibrated.provenance()}\n${PHOTO_WARNING}\n${lines.map((line,i)=>`Cote ${i+1} : ${line.unreliable?'À recalibrer':formatMeasure(line.value)+' mm'} (${line.source==='aruco'?'ArUco, coplanaire':line.source?'distance connue, approximative':'saisie manuelle'})`).join('\n')}\n${annotations.map(note=>note.text).join('\n')}\n${notes}`;},
     async canvases(){const pages=[await this.canvas()];{const {reportPages}=await import('./export-result.js');pages.push(...await reportPages(this.text()));}return pages;},
     async canvas(){if(!image)throw new Error('Importez une photo.');const checkbox=root.querySelector('[data-show-edges]'),show=checkbox.checked,previousPending=pending,previousSelection=selectedSegment;checkbox.checked=false;pending=null;selectedSegment=null;render();const out=document.createElement('canvas');out.width=canvas.width;out.height=canvas.height+Math.max(150,canvas.width*.12);
       const ctx=out.getContext('2d');ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--color-background');ctx.fillRect(0,0,out.width,out.height);ctx.drawImage(canvas,0,0);checkbox.checked=show;pending=previousPending;selectedSegment=previousSelection;render();

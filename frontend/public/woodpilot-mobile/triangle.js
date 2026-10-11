@@ -1,4 +1,4 @@
-import {formatMeasure} from './cintrage.js';
+import {formatMeasure, formatAngle } from './cintrage.js';
 export const TRIANGLE_MODES={legs:['adjacent','opposite'],hypAdjacent:['hypotenuse','adjacent'],hypOpposite:['hypotenuse','opposite'],adjacentAngle:['adjacent','angle'],oppositeAngle:['opposite','angle'],hypAngle:['hypotenuse','angle']};
 export const TRIANGLE_LABELS={adjacent:'Base (côté adjacent à α)',opposite:'Hauteur (côté opposé à α)',hypotenuse:'Diagonale (hypoténuse)',angle:'Angle α par rapport à la base'};
 export function calculateTriangle(data){
@@ -23,5 +23,5 @@ export function calculateTriangle(data){
 }
 export function triangleText(data){
  const r=calculateTriangle(data);
- return ['WoodPilot — Pythagore / Trigonométrie','Triangle rectangle uniquement',`Données connues : ${TRIANGLE_MODES[data.mode].map(key=>`${TRIANGLE_LABELS[key]} = ${formatMeasure(data[key])}${key==='angle'?'°':' mm'}`).join(' ; ')}`,`Base : ${formatMeasure(r.adjacent)} mm`,`Hauteur : ${formatMeasure(r.opposite)} mm`,`Diagonale : ${formatMeasure(r.hypotenuse)} mm`,`Angle α / base : ${formatMeasure(r.angle)}°`,`Angle complémentaire : ${formatMeasure(r.complement)}°`,`Pente : ${formatMeasure(r.percent)} %`,'Pythagore : diagonale² = base² + hauteur²','Trigonométrie : tan α = hauteur/base ; sin α = hauteur/diagonale ; cos α = base/diagonale','Les calculs utilisent les valeurs complètes, sans arrondir les résultats intermédiaires.'].join('\n');
+ return ['WoodPilot — Pythagore / Trigonométrie','Triangle rectangle uniquement',`Données connues : ${TRIANGLE_MODES[data.mode].map(key=>`${TRIANGLE_LABELS[key]} = ${(key==='angle'?formatAngle:formatMeasure)(data[key])}${key==='angle'?'°':' mm'}`).join(' ; ')}`,`Base : ${formatMeasure(r.adjacent)} mm`,`Hauteur : ${formatMeasure(r.opposite)} mm`,`Diagonale : ${formatMeasure(r.hypotenuse)} mm`,`Angle α / base : ${formatAngle(r.angle)}°`,`Angle complémentaire : ${formatAngle(r.complement)}°`,`Pente : ${formatAngle(r.percent)} %`,'Pythagore : diagonale² = base² + hauteur²','Trigonométrie : tan α = hauteur/base ; sin α = hauteur/diagonale ; cos α = base/diagonale','Les calculs utilisent les valeurs complètes, sans arrondir les résultats intermédiaires.'].join('\n');
 }

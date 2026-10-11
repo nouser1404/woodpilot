@@ -23,7 +23,7 @@ test('Le partage décrit les entrées, unités et hypothèse', () => {
   const text = bendingText(800,120);
   assert.match(text, /arc circulaire mineur/);
   assert.match(text, /Corde : 800 mm/);
-  assert.match(text, /Rayon : 726,7 mm/);
+  assert.match(text, /Rayon : 727 mm/);
   assert.match(text, /Angle au centre : 66,8°/);
 });
 
@@ -248,3 +248,5 @@ test('Hélice : cercle plan, demi-tour, pas et longueur développée',async()=>{
  const half=calculateHelix({radius:300,height:400,turns:.5});assert.equal(half.pitch,800);assert.equal(half.rotation,180);assert.equal(half.length,Math.hypot(300*Math.PI,400));
  for(const data of [{radius:0,height:1,turns:1},{radius:1,height:-1,turns:1},{radius:1,height:1,turns:0},{radius:NaN,height:1,turns:1}])assert.throws(()=>calculateHelix(data));
 });
+
+test('Affichage et transfert : millimètres entiers, angles au dixième, calculs conservés',async()=>{const {formatMeasure,formatAngle,calculateBending}=await import('../public/woodpilot-mobile/cintrage.js');const {roundedPhotoDimension}=await import('../public/woodpilot-mobile/photo-transfer.js');assert.equal(formatMeasure(800.49),'800');assert.equal(formatMeasure(800.51),'801');assert.equal(formatAngle(33.33333),'33,3');assert.equal(formatAngle(45),'45');assert.equal(roundedPhotoDimension(800.51),801);assert.throws(()=>roundedPhotoDimension(.2));assert.throws(()=>roundedPhotoDimension(NaN));assert.ok(Math.abs(calculateBending(800,120).radius-726.6666666666666)<1e-9);});

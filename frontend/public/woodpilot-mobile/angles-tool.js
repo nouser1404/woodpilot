@@ -1,14 +1,14 @@
 import { calculateMiter, miterText } from './calculators.js';
-import { formatMeasure } from './cintrage.js';
+import { formatMeasure, formatAngle } from './cintrage.js';
 import { editMeasurement } from './measurement-input.js';
 export function createAnglesTool({haptic}) {
   let angle=90;
   const root=document.querySelector('#anglesTool');
   function render() {
     const result=calculateMiter(angle);
-    root.querySelector('[data-angle-value]').textContent=`${formatMeasure(angle)}°`;
-    root.querySelector('[data-miter]').textContent=`${formatMeasure(result.miter)}°`;
-    root.querySelector('[data-half]').textContent=`${formatMeasure(result.halfAngle)}°`;
+    root.querySelector('[data-angle-value]').textContent=`${formatAngle(angle)}°`;
+    root.querySelector('[data-miter]').textContent=`${formatAngle(result.miter)}°`;
+    root.querySelector('[data-half]').textContent=`${formatAngle(result.halfAngle)}°`;
     const radians=angle*Math.PI/180;
     root.querySelector('[data-angle-line]').setAttribute('d',`M70 185H290 M70 185L${70+160*Math.cos(radians)} ${185-160*Math.sin(radians)}`);
   }

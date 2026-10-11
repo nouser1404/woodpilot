@@ -1,6 +1,6 @@
 import { calculateAretiers,aretiersText,templateSvg } from './aretiers.js';
 import { editMeasurement } from './measurement-input.js';
-import { formatMeasure } from './cintrage.js';
+import { formatMeasure, formatAngle } from './cintrage.js';
 import { downloadBlob } from './export-result.js';
 export function createAretiersTool({haptic,notify}) {
   let data={n:6,R:300,H:400,dx:0,dy:0,zCut:0,zCut2:0},selected=0;
@@ -12,9 +12,9 @@ export function createAretiersTool({haptic,notify}) {
     const select=root.querySelector('[data-edge-select]');select.replaceChildren();
     model.items.forEach(item=>{const option=document.createElement('option');option.value=String(item.index);option.textContent=`Arêtier ${item.index+1}`;select.append(option);});select.value=String(selected);
     const item=model.items[selected];root.querySelector('[data-edge-length]').textContent=`${formatMeasure(item.cutLength)} mm`;
-    root.querySelector('[data-tool-angle]').textContent=`${formatMeasure(item.bevelTool)}°`;
-    root.querySelector('[data-bevel]').textContent=`${formatMeasure(item.bevelFace)}°`;
-    root.querySelector('[data-delta]').textContent=`${formatMeasure(item.delta)}°`;
+    root.querySelector('[data-tool-angle]').textContent=`${formatAngle(item.bevelTool)}°`;
+    root.querySelector('[data-bevel]').textContent=`${formatAngle(item.bevelFace)}°`;
+    root.querySelector('[data-delta]').textContent=`${formatAngle(item.delta)}°`;
     root.querySelector('[data-base-edge]').textContent=`${formatMeasure(model.baseEdge)} mm`;
     const project=([x,y,z])=>[x-y,(x+y)*.35-z];
     const top=model.sections.at(-1)?.points;
