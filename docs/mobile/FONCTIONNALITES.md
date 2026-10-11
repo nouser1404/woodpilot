@@ -109,3 +109,9 @@ Outil accessible depuis Outils et ajoutable aux favoris Toolbox. Enregistrement 
 ## Inclinomètre
 
 Outil Métrer ajoutable à la Toolbox, mesure du plan de l’écran par la gravité (0° horizontal à 90° vertical), écran vers le haut ou le bas. Affichage à 0,1° et pente en %, référence absolue sans zéro relatif. Bouton Prendre la mesure ou switch Capture auto : 5 secondes de placement puis 2 secondes de stabilité du vecteur brut (écart maximal 0,3°, accélération proche de la gravité, interruption si mesures espacées de plus de 500 ms). Bip activable, mesure figée conservée quand le téléphone est relevé, nouvelle mesure, sauvegarde projet et export. Aucun échantillon vieux de plus d’une seconde ne peut être capturé. Capteurs arrêtés, capture annulée en arrière-plan ou à la fermeture ; dernière mesure figée conservée. Les boutons de volume iPhone ne sont pas accessibles à la PWA. Essai physique écran contre une pente sur iPhone à effectuer.
+
+## RAL Picker
+
+Recherche de références et familles françaises, palette indicative de 215 entrées, couleur HEX ou sélecteur, photo/caméra locale (JPEG/PNG/WebP jusqu’à 25 Mo et 32 MP, réduite à 1600 px), prélèvement moyen sur une zone de 11 × 11 pixels, trois teintes proches par distance CIE76 dans CIELAB D65. Choix du RAL, sauvegarde projet et exports. Photos non transmises ni conservées dans les projets : seules la couleur prélevée, la référence choisie et l’origine sont enregistrées. Avertissement permanent : comparaison au nuancier physique avant commande ; aucune identification certifiée, ni pourcentage de confiance.
+
+Palette adaptée de https://github.com/ieskudero/ral-colors (MIT, licence dans vendor/ral/LICENSE.txt, empreinte source dans ral-palette.js), indépendante de la bibliothèque officielle RAL. Valeurs sRGB approximatives ; liste non présentée comme exhaustive. Validation des décisions de couleur sur échantillons physiques : https://www.ral-farben.de/en/ral-digital-colour-library .
