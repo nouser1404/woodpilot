@@ -1,3 +1,4 @@
+import {createSuppliersTool} from './suppliers-tool.js';
 import {createStairsTool} from './stairs-tool.js';
 import {calculateStairLayout} from './stairs-layout.js';
 import {installCalculatorSteps,installCutlistSteps} from './guided-tools.js';
@@ -32,6 +33,7 @@ import { calculateAretiers } from './aretiers.js';
 import { validatePhoto } from './photo-model.js';
 import { generateCabinet,validateCutList } from './manufacturing.js';
 const catalog=[
+  {id:'suppliers',name:'Fournisseurs',icon:'storefront',desc:'Adresses, carte et contacts pour l’atelier.',cat:'CHANTIER'},
   {id:'stairs',name:'Escalier',icon:'diagonal_line',desc:'Escaliers droits, tournants, à paliers et hélicoïdaux.',cat:'CALCULER'},
   {id:'ral',name:'RAL Picker',icon:'palette',desc:'Chercher une teinte et les RAL proches d’une photo.',cat:'CHANTIER'},
   {id:'inclino',name:'Inclinomètre',icon:'architecture',desc:'Mesurer et mémoriser une pente, écran contre la surface.',cat:'MÉTRER'},
@@ -59,6 +61,7 @@ async function share(data) {
   downloadBlob(new Blob([data.text],{type:'text/plain;charset=utf-8'}),'woodpilot-resultat.txt');notify('Résultat téléchargé.');
 }
 const controllers={
+  suppliers:createSuppliersTool({notify}),
   stairs:createStairsTool({haptic}),ral:createRalTool({notify}),inclino:createInclinometerTool({haptic}),voice:createVoiceTool({notify}),level:createLevelTool(),helix:createHelixTool({haptic}),triangle:createTriangleTool({haptic}),
   bending:createBendingTool({haptic}),slope:createSlopeTool({haptic}),angles:createAnglesTool({haptic}),
   spacing:createSpacingTool({haptic}),photo:createPhotoTool({notify,haptic,transfer(dimensions){controllers.cabinet.applyDimensions(dimensions);controllers.photo.root.close();openTool('cabinet');}}),aretiers:createAretiersTool({haptic,notify}),
@@ -75,7 +78,7 @@ function openTool(id){opener=document.activeElement;controllers[id==='nesting'?'
 const projects=createProjectsUI({tools:controllers,openTool,notify});
 Object.entries(controllers).forEach(([id,tool])=>{
   tool.id=id;tool.title=id==='cutlist'?'Débit / Calpinage':catalog.find(item=>item.id===id).name;tool.validate=data=>{if(!data||typeof data!=='object')throw new Error('Résultat invalide.');return validators[id](data);};
-  if(!['level','voice'].includes(id))bindResultActions(tool,{save:projects.save,share,notify});
+  if(!['level','voice','suppliers'].includes(id))bindResultActions(tool,{save:projects.save,share,notify});
   tool.root.onclose=()=>opener?.focus();
   tool.root.querySelectorAll('[data-close],#closeBending,#closeSlope').forEach(button=>button.onclick=()=>tool.root.close());
 });
@@ -91,13 +94,13 @@ function renderWheel() {
   const tools=wheelTools(),step=360/tools.length,radius=Math.min(165,(stage.clientWidth-72)/2);
   selected=Math.min(selected,tools.length-1);wheel.replaceChildren();
   tools.forEach((tool,index)=>{const angle=(index*step-90)*Math.PI/180,button=document.createElement('button');
-    button.className='tool-node'+(index===selected?' selected':'');button.setAttribute('aria-label',tool.name);button.setAttribute('aria-pressed',String(index===selected));button.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded${tool.icon==='diagonal_line'?' diagonal-icon':''}">${tool.icon}</span>`;
+    button.className='tool-node'+(index===selected?' selected':'');button.setAttribute('aria-label',tool.name);button.setAttribute('aria-pressed',String(index===selected));button.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded${tool.icon==='storefront'?' supplier-icon':tool.icon==='diagonal_line'?' diagonal-icon':''}">${tool.icon}</span>`;
     button.style.transform=`translate(${Math.cos(angle)*radius}px,${Math.sin(angle)*radius}px) rotate(${-rotation}deg)`;
     let holdTimer;button.onpointerdown=()=>holdTimer=setTimeout(()=>{suppressClick=true;favouriteEditor.open();},650);button.onpointerup=button.onpointercancel=button.onpointerleave=()=>clearTimeout(holdTimer);
     button.onclick=()=>{if(suppressClick)return;select(index);wheel.children[index].focus();};wheel.append(button);
   });
   wheel.style.transform=`rotate(${rotation}deg)`;
-  const tool=tools[selected];document.querySelector('#selectedName').textContent=tool.name;document.querySelector('#selectedDesc').textContent=tool.desc;document.querySelector('#centerIcon').textContent=tool.icon;document.querySelector('#centerIcon').classList.toggle('diagonal-icon',tool.icon==='diagonal_line');
+  const tool=tools[selected];document.querySelector('#selectedName').textContent=tool.name;document.querySelector('#selectedDesc').textContent=tool.desc;document.querySelector('#centerIcon').textContent=tool.icon;document.querySelector('#centerIcon').classList.toggle('diagonal-icon',tool.icon==='diagonal_line');document.querySelector('#centerIcon').classList.toggle('supplier-icon',tool.icon==='storefront');
   document.querySelector('#openTool').setAttribute('aria-label',`Ouvrir ${tool.name}`);
 }
 function select(index){const next=(index+favourites.length)%favourites.length;let delta=next-selected;if(delta>favourites.length/2)delta-=favourites.length;if(delta<-favourites.length/2)delta+=favourites.length;rotation-=delta*360/favourites.length;selected=next;haptic();renderWheel();}
@@ -123,7 +126,7 @@ function renderLibrary(filter='') {
   const filtered=catalog.filter(tool=>normalize(tool.name).includes(normalize(filter)));
   if(!filtered.length){root.textContent='Aucun outil trouvé.';return;}
   [...new Set(filtered.map(tool=>tool.cat))].forEach(category=>{const group=document.createElement('section');group.className='library-group';const heading=document.createElement('h3');heading.textContent=category;group.append(heading);
-    filtered.filter(tool=>tool.cat===category).forEach(tool=>{const row=document.createElement('div');row.className='library-item';const open=document.createElement('button');open.className='library-row';open.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded${tool.icon==='diagonal_line'?' diagonal-icon':''}">${tool.icon}</span><span>${tool.name}<small>${tool.desc}</small></span><span aria-hidden="true" class="material-symbols-rounded">chevron_right</span>`;open.onclick=()=>openTool(tool.id);
+    filtered.filter(tool=>tool.cat===category).forEach(tool=>{const row=document.createElement('div');row.className='library-item';const open=document.createElement('button');open.className='library-row';open.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded${tool.icon==='storefront'?' supplier-icon':tool.icon==='diagonal_line'?' diagonal-icon':''}">${tool.icon}</span><span>${tool.name}<small>${tool.desc}</small></span><span aria-hidden="true" class="material-symbols-rounded">chevron_right</span>`;open.onclick=()=>openTool(tool.id);
       const favourite=document.createElement('button');favourite.className='icon-btn favourite';favourite.innerHTML='<span aria-hidden="true" class="material-symbols-rounded">star</span>';favourite.setAttribute('aria-pressed',String(favourites.includes(tool.id)));favourite.setAttribute('aria-label',`${favourites.includes(tool.id)?'Retirer':'Ajouter'} ${tool.name} ${favourites.includes(tool.id)?'de':'à'} la toolbox`);favourite.onclick=()=>toggleFavourite(tool.id);row.append(open,favourite);group.append(row);
     });root.append(group);
   });

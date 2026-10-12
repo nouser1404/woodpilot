@@ -1,0 +1,20 @@
+Leaflet 1.9.4 — https://leafletjs.com/
+Copyright (c) 2010-2023, Vladimir Agafonkin
+Copyright (c) 2010-2011, CloudMade
+Licence BSD 2-Clause. Texte complet dans LEAFLET-LICENSE.txt.
+
+Fond de carte : © OpenStreetMap contributors.
+https://www.openstreetmap.org/copyright
+Les tuiles sont téléchargées à l’affichage depuis tile.openstreetmap.org.
+Elles ne sont pas incluses dans cette archive.
+https://operations.osmfoundation.org/policies/tiles/
+
+Géocodage français : Géoplateforme IGN / Base Adresse Nationale.
+https://data.geopf.fr/geocodage/search
+Géocodage belge et vérifications de rues : Photon / OpenStreetMap.
+https://photon.komoot.io/
+
+Les coordonnées commerciales proviennent des sources publiques officielles
+indiquées dans chaque fiche. La consultation et la date ne garantissent
+ni l’exhaustivité ni la disponibilité commerciale. Aucun logo, photographie
+ou texte commercial long de fournisseur n’a été incorporé.
