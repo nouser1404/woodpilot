@@ -4,7 +4,7 @@ export const supplierCountry=s=>s.country||'FR';
 export const supplierArea=s=>SUPPLIER_AREAS[s.department]||s.department;
 const normalize=value=>String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 export function validateSuppliers(data){
- if(!Array.isArray(data)||data.length>5000)throw new Error('Données fournisseurs invalides.');const ids=new Set();
+ if(!Array.isArray(data)||!data.length||data.length>5000)throw new Error('Données fournisseurs invalides.');const ids=new Set();
  for(const s of data){if(!s||!Number.isInteger(s.id)||s.id<=0||ids.has(s.id)||!['FR','BE'].includes(supplierCountry(s))||!SUPPLIER_CATEGORIES.includes(s.category)||!['name','address','phone','email','url','description','department','checked'].every(k=>typeof s[k]==='string')||!Array.isArray(s.tags)||s.tags.some(t=>typeof t!=='string'))throw new Error('Fiche fournisseur invalide.');ids.add(s.id);const url=new URL(s.url);if(url.protocol!=='https:'||!/^\d{4}-\d{2}-\d{2}$/.test(s.checked))throw new Error('Source fournisseur invalide.');if((s.lat==null)!==(s.lon==null)||(s.lat!=null&&(!Number.isFinite(s.lat)||!Number.isFinite(s.lon)||Math.abs(s.lat)>90||Math.abs(s.lon)>180)))throw new Error('Position fournisseur invalide.');}
  return data;
 }
@@ -21,4 +21,10 @@ export function supplierDirections(s){return 'https://www.google.com/maps/dir/?a
 export function supplierGeoText(s){return s.lat==null?'Position non disponible':s.geoType==='official_point'?'Point d’accès publié par l’établissement':s.geoType==='housenumber'&&s.geoScore>=.8?'Repère géocodé à l’adresse':s.geoType==='street'?'Repère approximatif à la rue':'Repère approximatif — position à confirmer';}
 export function readSupplierPreferences(storage){
  try{const f=JSON.parse(storage.getItem('wp-supplier-favorites')),n=JSON.parse(storage.getItem('wp-supplier-notes'));return {favorites:Array.isArray(f)?[...new Set(f.filter(id=>Number.isInteger(id)&&id>0))]:[],notes:n&&typeof n==='object'&&!Array.isArray(n)?Object.fromEntries(Object.entries(n).filter(([id,v])=>/^\d+$/.test(id)&&typeof v==='string').map(([id,v])=>[id,v.slice(0,4000)])):{}};}catch{return {favorites:[],notes:{}};}
+}
+
+export function supplierCoverage(data){
+ if(!data.length)return "Aucune fiche fournisseur disponible.";
+ const fr=data.filter(s=>supplierCountry(s)==='FR'),be=data.filter(s=>supplierCountry(s)==='BE'),dates=[...new Set(data.map(s=>s.checked))].sort(),date=v=>v.split('-').reverse().join('/');
+ return `${data.length} fiches · sélection non exhaustive. France : ${fr.length} fiches dans ${new Set(fr.map(s=>s.department)).size} départements. Belgique : ${be.length} fiches dans le Hainaut et la Flandre-Occidentale, à moins de 50 km de la frontière française à vol d’oiseau. Sources consultées ${dates.length===1?'le '+date(dates[0]):'du '+date(dates[0])+' au '+date(dates.at(-1))}. Les repères à la rue ou à la commune sont approximatifs. Confirmez prestations, horaires et disponibilités auprès des établissements.`;
 }

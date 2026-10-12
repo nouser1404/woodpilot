@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {validateSuppliers,filterSuppliers,supplierAreas,supplierDistance,supplierDirections,readSupplierPreferences} from '../public/woodpilot-mobile/suppliers-model.js';
+import {validateSuppliers,filterSuppliers,supplierAreas,supplierDistance,supplierDirections,readSupplierPreferences,supplierCoverage} from '../public/woodpilot-mobile/suppliers-model.js';
 const data=JSON.parse(readFileSync(new URL('../public/woodpilot-mobile/suppliers/suppliers.json',import.meta.url),'utf8'));
 test('Canonical supplier IDs, coverage and geographic constraints preserved',()=>{
- assert.equal(validateSuppliers(data),data);assert.equal(data.length,51);assert.equal(new Set(data.map(x=>x.id)).size,51);assert.equal(filterSuppliers(data,{country:'FR'}).length,44);assert.equal(filterSuppliers(data,{country:'BE'}).length,7);assert.equal(supplierAreas(data,'FR').length,12);assert.deepEqual(supplierAreas(data,'BE'),['BE-HAI','BE-VWV']);for(const s of data.filter(x=>x.country==='BE'))assert.ok(s.borderDistanceUpperBoundKm<=50);assert.throws(()=>validateSuppliers([...data,data[0]]));assert.throws(()=>validateSuppliers([{...data[0],url:'javascript:alert(1)'}]));
+ assert.equal(validateSuppliers(data),data);assert.equal(data.length,62);assert.equal(new Set(data.map(x=>x.id)).size,62);assert.equal(filterSuppliers(data,{country:'FR'}).length,55);assert.equal(filterSuppliers(data,{country:'BE'}).length,7);assert.equal(supplierAreas(data,'FR').length,12);assert.deepEqual(supplierAreas(data,'BE'),['BE-HAI','BE-VWV']);for(const s of data.filter(x=>x.country==='BE'))assert.ok(s.borderDistanceUpperBoundKm<=50);assert.throws(()=>validateSuppliers([...data,data[0]]));assert.throws(()=>validateSuppliers([{...data[0],url:'javascript:alert(1)'}]));
 });
 test('Search ignores accents and combined country, area, category and service filters intersect',()=>{
  const s=data.find(x=>x.tags.length),term=s.name;assert.ok(filterSuppliers(data,{search:term.normalize('NFD').replace(/[\u0300-\u036f]/g,'')}).some(x=>x.id===s.id));const matches=filterSuppliers(data,{country:s.country||'FR',area:s.department,category:s.category,service:s.tags[0]});assert.ok(matches.some(x=>x.id===s.id));for(const x of matches){assert.equal(x.category,s.category);assert.equal(x.department,s.department);assert.ok(x.tags.includes(s.tags[0]));}assert.deepEqual(filterSuppliers(data,{search:'no-such-supplier-xxxxxxxx'}),[]);
@@ -16,5 +16,11 @@ test('Distance sorting retains unlocated suppliers and does not confuse road or 
  const origin=[50,3],items=[{...data[0],id:101,name:'Unknown',lat:null,lon:null},{...data[0],id:102,name:'Far',lat:51,lon:3},{...data[0],id:103,name:'Near',lat:50,lon:3}];assert.equal(supplierDistance(items[2],origin),0);assert.equal(supplierDistance(items[0],origin),null);assert.ok(Math.abs(supplierDistance(items[1],origin)-111.195)<.01);assert.deepEqual(filterSuppliers(items,{origin}).map(x=>x.id),[103,102,101]);assert.ok(supplierDirections(data[0]).startsWith('https://www.google.com/maps/dir/?api=1&destination='));
 });
 test('CSV retains the canonical number of establishments and IDs are not regenerated',()=>{
- const csv=readFileSync(new URL('../public/woodpilot-mobile/suppliers/fournisseurs.csv',import.meta.url),'utf8');assert.equal(csv.charCodeAt(0),0xFEFF);assert.ok(csv.includes(data[0].name));assert.equal(csv.trim().split(/\r?\n/).length,52);
+ const csv=readFileSync(new URL('../public/woodpilot-mobile/suppliers/fournisseurs.csv',import.meta.url),'utf8');assert.equal(csv.charCodeAt(0),0xFEFF);assert.ok(csv.includes(data[0].name));assert.equal(csv.trim().split(/\r?\n/).length,data.length+1);
+});
+
+test('Enrichment preserves known IDs and coverage/export reflect the current dataset',()=>{
+ for(const [id,name] of [[1,'Descamps Marcq'],[26,'SAEM Affûtage'],[45,'Dapsens-Soyer'],[51,'Gedimat Thiebaut'],[52,'2RA'],[62,'Scierie Lefebvre']])assert.equal(data.find(s=>s.id===id).name,name);
+ assert.equal(data.filter(s=>s.id>51).length,11);for(const s of data.filter(s=>s.id>51)){assert.equal(s.checked,'2026-10-12');assert.ok(s.geoLabel&&s.geoSource&&Number.isFinite(s.lat)&&Number.isFinite(s.lon));}
+ assert.ok(supplierCoverage(data).includes('62 fiches'));assert.ok(supplierCoverage(data).includes('55 fiches dans 12 départements'));assert.equal(data.find(s=>s.name==='Legallais Rouen').geoType,'street');
 });
