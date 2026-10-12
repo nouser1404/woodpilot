@@ -1,3 +1,4 @@
+export const DEFAULT_FAVOURITES=['photo','level','nesting','inclino','voice','ral','cabinet','spacing'];
 export function moveFavourite(ids,id,delta) {
   const next=[...ids],index=next.indexOf(id),target=index+delta;
   if(index<0||!Number.isInteger(delta)||target<0||target>=next.length)return next;

@@ -14,7 +14,7 @@ import { createTriangleTool } from './triangle-tool.js';
 import { calculateTriangle } from './triangle.js';
 import { createLevelTool } from './level-tool.js';
 import { createOffcutsTool,validateOffcutsSnapshot } from './offcuts-tool.js';
-import { createFavouritesEditor } from './favourites.js';
+import { createFavouritesEditor,DEFAULT_FAVOURITES } from './favourites.js';
 import { createBendingTool } from './bending-tool.js';
 import { createSlopeTool } from './slope-tool.js';
 import { createAnglesTool } from './angles-tool.js';
@@ -80,11 +80,11 @@ Object.entries(controllers).forEach(([id,tool])=>{
   tool.root.querySelectorAll('[data-close],#closeBending,#closeSlope').forEach(button=>button.onclick=()=>tool.root.close());
 });
 document.querySelectorAll('#measurementSheet,#pieceSheet,#projectDetail,#saveSheet,#exportSheet,#projectNameSheet').forEach(dialog=>dialog.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>dialog.close()));
-let favourites=catalog.filter(tool=>!['stairs','level','triangle','helix','voice','inclino','ral'].includes(tool.id)).slice(0,8).map(tool=>tool.id);
+let favourites=[...DEFAULT_FAVOURITES];
 try{const saved=JSON.parse(localStorage.getItem('woodpilot-tools-favourites'));if(Array.isArray(saved)&&saved.length>=1&&saved.length<=8&&new Set(saved).size===saved.length&&saved.every(id=>catalog.some(tool=>tool.id===id)))favourites=saved;}catch{}
 const favouriteEditor=createFavouritesEditor({catalog,getIds:()=>favourites,onChange(ids){favourites=ids;selected=0;rotation=0;try{localStorage.setItem('woodpilot-tools-favourites',JSON.stringify(ids));}catch{notify('Ordre non conservé sur cet appareil.');}renderWheel();}});
 document.querySelector('[data-reorder-wheel]').onclick=()=>favouriteEditor.open();
-let selected=Math.max(0,favourites.indexOf('bending')),rotation=-selected*360/favourites.length,startX=0,dragging=false,suppressClick=false;
+let selected=0,rotation=-selected*360/favourites.length,startX=0,dragging=false,suppressClick=false;
 const wheel=document.querySelector('#wheel'),stage=document.querySelector('#wheelStage');
 const wheelTools=()=>favourites.map(id=>catalog.find(tool=>tool.id===id));
 function renderWheel() {
