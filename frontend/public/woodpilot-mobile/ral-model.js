@@ -1,3 +1,4 @@
+import {validateDecorSelection} from './decor-model.js';
 import {RAL_PALETTE} from './ral-palette.js';
 export {RAL_PALETTE};
 export const RAL_WARNING='Correspondance indicative : confirmer avec un nuancier physique avant de commander la peinture.';
@@ -27,4 +28,4 @@ export function samplePhotoColor(image,x,y,radius=5){
   if(!weight)throw new RangeError('Zone transparente : choisissez une zone peinte.');return rgbHex(total.map(v=>v/weight));
 }
 export const ralFamily=code=>({'1':'Jaunes et beiges','2':'Oranges','3':'Rouges','4':'Violets','5':'Bleus','6':'Verts','7':'Gris','8':'Bruns','9':'Blancs et noirs'})[code[0]]||'';
-export function validateRalSelection(data){parseHex(data?.hex);if(!RAL_PALETTE.some(color=>color.code===data.code)||!['photo','manual','palette'].includes(data.source))throw new RangeError('Référence RAL invalide.');return data;}
+export function validateRalSelection(data){if(data?.kind)return validateDecorSelection(data);parseHex(data?.hex);if(!RAL_PALETTE.some(color=>color.code===data.code)||!['photo','manual','palette'].includes(data.source))throw new RangeError('Référence RAL invalide.');return data;}

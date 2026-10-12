@@ -35,7 +35,7 @@ import { generateCabinet,validateCutList } from './manufacturing.js';
 const catalog=[
   {id:'suppliers',name:'Fournisseurs',icon:'storefront',desc:'Adresses, carte et contacts pour l’atelier.',cat:'CHANTIER'},
   {id:'stairs',name:'Escalier',icon:'diagonal_line',desc:'Escaliers droits, tournants, à paliers et hélicoïdaux.',cat:'CALCULER'},
-  {id:'ral',name:'RAL Picker',icon:'palette',desc:'Chercher une teinte et les RAL proches d’une photo.',cat:'CHANTIER'},
+  {id:'ral',name:'Palette de couleurs',icon:'palette',desc:'RAL, décors mélaminés et textures de panneaux.',cat:'CHANTIER'},
   {id:'inclino',name:'Inclinomètre',icon:'architecture',desc:'Mesurer et mémoriser une pente, écran contre la surface.',cat:'MÉTRER'},
   {id:'voice',name:'Notes vocales',icon:'mic',desc:'Enregistrer et réécouter les rappels de chantier.',cat:'CHANTIER'},
   {id:'helix',name:'Hélicoïdale',icon:'line_curve',desc:'Longueur développée d’une hélice à pas constant.',cat:'CALCULER'},

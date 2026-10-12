@@ -110,7 +110,7 @@ Outil accessible depuis Outils et ajoutable aux favoris Toolbox. Enregistrement 
 
 Outil Métrer ajoutable à la Toolbox, mesure du plan de l’écran par la gravité (0° horizontal à 90° vertical), écran vers le haut ou le bas. Affichage à 0,1° et pente en %, référence absolue sans zéro relatif. Bouton Prendre la mesure ou switch Capture auto : 5 secondes de placement puis 2 secondes de stabilité du vecteur brut (écart maximal 0,3°, accélération proche de la gravité, interruption si mesures espacées de plus de 500 ms). Bip activable, mesure figée conservée quand le téléphone est relevé, nouvelle mesure, sauvegarde projet et export. Aucun échantillon vieux de plus d’une seconde ne peut être capturé. Capteurs arrêtés, capture annulée en arrière-plan ou à la fermeture ; dernière mesure figée conservée. Les boutons de volume iPhone ne sont pas accessibles à la PWA. Essai physique écran contre une pente sur iPhone à effectuer.
 
-## RAL Picker
+## Palette de couleurs
 
 Recherche de références et familles françaises, palette indicative de 215 entrées, couleur HEX ou sélecteur, photo/caméra locale (JPEG/PNG/WebP jusqu’à 25 Mo et 32 MP, réduite à 1600 px), prélèvement moyen sur une zone de 11 × 11 pixels, trois teintes proches par distance CIE76 dans CIELAB D65. Choix du RAL, sauvegarde projet et exports. Photos non transmises ni conservées dans les projets : seules la couleur prélevée, la référence choisie et l’origine sont enregistrées. Avertissement permanent : comparaison au nuancier physique avant commande ; aucune identification certifiée, ni pourcentage de confiance.
 
@@ -154,6 +154,16 @@ Bouton Étiquettes de pièces à la dernière étape du calpinage. Une étiquett
 ### Niveau / aplomb : activation progressive
 Deux étapes : bouton gris avec croix avant activation ; bouton coloré avec coche une fois le capteur autorisé. Le bouton actif permet aussi d’arrêter le capteur. Radar, lecture, bouton son et paramètres restent masqués avant activation. Les paramètres sont regroupés sous le radar ; choix du contrôle, axes et référence restent accessibles. Six cercles concentriques contrastés, bulle uniquement avec une mesure récente. Un capteur autorisé mais sans échantillon n’affiche aucune mesure fictive. Cadence calculée sur l’angle exact, 160 à 2 000 ms selon l’écart, 140 ms après alignement stable ; enveloppe douce de 130 ms sans recouvrement. Son activé par défaut, arrêté à la fermeture ou en arrière-plan.
 
-Toolbox par défaut : Photo Métré, Niveau / Aplomb, Calpinage, Inclinomètre, Notes vocales, RAL Picker, Caisson, Répartition, dans cet ordre. Les favoris personnalisés déjà enregistrés sont conservés.
+Toolbox par défaut : Photo Métré, Niveau / Aplomb, Calpinage, Inclinomètre, Notes vocales, Palette de couleurs, Caisson, Répartition, dans cet ordre. Les favoris personnalisés déjà enregistrés sont conservés.
 
 Fournisseurs : module natif de consultation dans CHANTIER, recherche et filtres repliés, liste/carte, contacts, favoris et notes locales, export CSV. Données et détails d’intégration : `FOURNISSEURS.md`.
+
+### Décors mélaminés et textures
+
+L’outil Palette de couleurs conserve l’identifiant `ral` et les sélections RAL déjà sauvegardées. Trois vues : RAL, Mélaminés, Textures. Première sélection Pfleiderer : 21 décors unis/bois/matières (dont U17005 Rouge Carmin) et 17 textures. Les fiches fabricant ont été consultées le 12/10/2026 ; seules les finitions cochées pour panneau mélaminé MFB sont proposées pour chaque décor. Une texture de surface n’est pas une teinte RAL. La recherche accepte codes avec espaces, noms et accents.
+
+`decor-catalog.js` contient noms, références, finitions compatibles, date et URLs fabricant ; `decor-model.js` valide les sélections et fournit la recherche et le texte de partage ; `decor-browser.js` orchestre l’interface. Les sélections `{kind:'decor',decorCode,finish}` et `{kind:'texture',textureCode}` sont sauvegardables dans les projets. Aucun rapprochement automatique photo → décor bois n’est prétendu.
+
+Aperçus © Pfleiderer chargés directement depuis le fabricant, à la demande lors de l’ouverture des vues ; pas de copie des images dans l’archive ni dans le cache hors connexion de l’application. Hors connexion les références restent disponibles avec un message explicite si l’aperçu ne charge pas. Les vignettes ne garantissent pas la couleur, l’échelle du motif ni le relief réel. La fiche fabricant permet de vérifier les variantes et échantillons. Catalogue non exhaustif, sans garantie de stock ; confirmer sur échantillon physique.
+
+Sources : https://www.pfleiderer.com/fr-fr/produits/decors/detailler/u17005 et les URLs de chaque fiche dans le catalogue ; collection https://www.pfleiderer.com/fr-fr/collection-2025-2028 .

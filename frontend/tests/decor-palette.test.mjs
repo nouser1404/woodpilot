@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {PANEL_DECORS,PANEL_TEXTURES,decorSearch,validateDecorSelection,decorSelectionText} from '../public/woodpilot-mobile/decor-model.js';
+import {validateRalSelection} from '../public/woodpilot-mobile/ral-model.js';
+test('U17005 remains a manufacturer decor with confirmed MFB finish',()=>{const s=PANEL_DECORS.find(s=>s.code==='U17005');assert.equal(s.name,'Rouge Carmin');assert.deepEqual(s.finishes,['SD']);assert.equal(decorSearch(PANEL_DECORS,'u 17005')[0],s);assert.ok(decorSearch(PANEL_DECORS,'chene').length>0);});
+test('only published catalog references and compatible finishes can be saved',()=>{assert.equal(validateRalSelection({kind:'decor',decorCode:'U17005',finish:'SD'}).kind,'decor');assert.throws(()=>validateDecorSelection({kind:'decor',decorCode:'U17005',finish:'NW'}));assert.throws(()=>validateDecorSelection({kind:'texture',textureCode:'FAKE'}));assert.equal(validateRalSelection({hex:'#383E42',code:'7016',source:'photo'}).code,'7016');assert.ok(decorSelectionText({kind:'texture',textureCode:'SD'}).includes('Sandpearl'));});
+test('all decor and texture sources point to manufacturer with unique references',()=>{for(const list of [PANEL_DECORS,PANEL_TEXTURES]){assert.equal(new Set(list.map(s=>s.code)).size,list.length);for(const s of list){assert.equal(new URL(s.url).hostname,'www.pfleiderer.com');assert.equal(new URL(s.image).hostname,'www.pfleiderer.com');assert.ok(s.name);}}assert.ok(PANEL_DECORS.length>=20);assert.ok(PANEL_TEXTURES.length>=6);});
