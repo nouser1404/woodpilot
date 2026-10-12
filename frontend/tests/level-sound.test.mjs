@@ -5,3 +5,13 @@ test('Niveau sonore : bip de confirmation sans mesure et cadence variable sans d
 test('Niveau sonore : pas de bip ni activation tardive après désactivation',async()=>{let release;const {Audio,events}=audio();Audio.prototype.resume=function(){return new Promise(resolve=>{release=()=>{this.state='running';resolve();};});};const s=createLevelSound({getAudio:()=>Audio}),pending=s.enable();s.disable();release();await pending;assert.equal(s.enabled,false);assert.ok(!events.includes('beep'));});
 test('Niveau sonore : rafraîchissement sans mesure ne coupe pas le bip de confirmation',async()=>{let starts=0,stops=0;const {Audio}=audio();Audio.prototype.createOscillator=()=>({frequency:{value:0},connect(){},disconnect(){},start(){starts++;},stop(){stops++;}});const s=createLevelSound({getAudio:()=>Audio});await s.enable();assert.equal(starts,1);assert.equal(stops,1);s.reset();s.reset();assert.equal(stops,1,'Pas d’arrêt immédiat après le bip planifié');s.disable();assert.equal(stops,2);});
 test('Niveau sonore : session lecture pour iPhone compatible et restauration à l’arrêt',async()=>{const {Audio}=audio(),session={type:'auto'};const s=createLevelSound({getAudio:()=>Audio,getSession:()=>session});await s.enable();assert.equal(session.type,'playback');s.disable();assert.equal(session.type,'auto');});
+
+test('Niveau sonore : fréquence distincte pour l’alignement et enveloppe sans attaque brutale',async()=>{
+ const frequencies=[],ramps=[];const {Audio}=audio();
+ Audio.prototype.createOscillator=()=>{const frequency={value:0};return {frequency,connect(){},disconnect(){},start(){frequencies.push(frequency.value);},stop(){}};};
+ Audio.prototype.createGain=()=>({gain:{setValueAtTime(value,time){ramps.push([value,time]);},linearRampToValueAtTime(value,time){ramps.push([value,time]);}},connect(){},disconnect(){}});
+ const sound=createLevelSound({getAudio:()=>Audio});await sound.enable();sound.tone(0,0,true);
+ assert.deepEqual(frequencies,[660,880]);assert.deepEqual(ramps.slice(0,4),[[0,0],[.16,.015],[.16,.055],[0,.12]]);sound.disable();
+});
+
+test("Niveau sonore : distinction fine près du centre et absence de recouvrement des bips",()=>{const values=[0,.1,.2,.5,1,3,10].map(a=>levelBeepInterval(a));for(let i=1;i<values.length;i++)assert.ok(values[i]>values[i-1]);assert.ok(levelBeepInterval(.1)<220);assert.ok(levelBeepInterval(0,true)>=130);assert.ok(levelBeepInterval(0,true)<levelBeepInterval(0));});

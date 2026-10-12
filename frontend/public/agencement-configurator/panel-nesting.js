@@ -67,10 +67,10 @@ function fittingCandidate(panel, piece, panelIndex) {
   return best;
 }
 
-function remainingRectangles(rect, placed, kerfMm) {
+function remainingRectangles(rect, placed, kerfMm, splitAxis) {
   const remainingLength = rect.lengthMm - placed.lengthMm - kerfMm;
   const remainingWidth = rect.widthMm - placed.widthMm - kerfMm;
-  const splitVertically = remainingLength > remainingWidth;
+  const splitVertically = splitAxis === 'vertical' || (splitAxis !== 'horizontal' && remainingLength > remainingWidth);
   const rectangles = splitVertically
     ? [
       { x: rect.x + placed.lengthMm + kerfMm, y: rect.y, lengthMm: remainingLength, widthMm: rect.widthMm },
@@ -91,7 +91,7 @@ function createPanel(lengthMm, widthMm) {
   };
 }
 
-function placePiece(panel, piece, candidate, kerfMm, placementIndex) {
+function placePiece(panel, piece, candidate, kerfMm, placementIndex, splitAxis) {
   const placed = {
     ...piece,
     x: candidate.rect.x,
@@ -106,7 +106,7 @@ function placePiece(panel, piece, candidate, kerfMm, placementIndex) {
   panel.freeRects.splice(
     candidate.rectIndex,
     1,
-    ...remainingRectangles(candidate.rect, placed, kerfMm),
+    ...remainingRectangles(candidate.rect, placed, kerfMm, splitAxis),
   );
   return placed;
 }
@@ -147,7 +147,7 @@ export function solvePanelNesting(panel, pieces, options = {}) {
     }
 
     placementIndex += 1;
-    placePiece(panels[best.panelIndex], piece, best, sawKerfMm, placementIndex);
+    placePiece(panels[best.panelIndex], piece, best, sawKerfMm, placementIndex, options.splitAxis);
   });
 
   const totalUsedAreaMm2 = panels.reduce((sum, item) => sum + item.usedAreaMm2, 0);

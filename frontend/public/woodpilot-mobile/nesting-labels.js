@@ -1,0 +1,19 @@
+import {formatMeasure} from './cintrage.js';
+export const LABEL_FORMATS={a4:{name:'A4 · 24 étiquettes · 63,5 × 33,9 mm',width:63.5,height:33.9,columns:3,rows:8,page:'A4',margin:'12.9mm 9.75mm'},thermal:{name:'Rouleau · 100 × 50 mm',width:100,height:50,columns:1,rows:1,page:'100mm 50mm',margin:'0'}};
+const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export function nestingLabels(data,groups,date=new Date()){
+ const labels=[];let panelNumber=0;
+ for(const group of groups)for(const panel of group.result.panels){panelNumber++;for(const p of panel.pieces)labels.push({number:labels.length+1,reference:`${p.code}-${p.copyIndex+1}`,code:p.code,occurrence:p.copyIndex+1,quantity:p.quantity,name:p.name,project:data.projectName||'',material:data.material||'Non renseigné',date:date.toLocaleDateString('fr-FR'),length:p.originalLengthMm,width:p.originalWidthMm,thickness:group.thickness,panel:panelNumber});}
+ return labels;
+}
+export function labelMarkup(label){
+ return `<article class="piece-label-print"><div class="label-id"><strong>${escape(label.reference)}</strong><span>N° ${label.number} · panneau ${label.panel}</span></div>${label.project?`<div class="label-project">${escape(label.project)}</div>`:''}<div class="label-name">${escape(label.name)}</div><div class="label-size">${formatMeasure(label.length)} × ${formatMeasure(label.width)} mm</div><div class="label-meta">Ép. ${formatMeasure(label.thickness)} mm · ${escape(label.material)}</div><div class="label-date">${escape(label.date)} · pièce ${label.occurrence}/${label.quantity}</div></article>`;
+}
+export function labelsDocument(labels,format='a4'){
+ const f=LABEL_FORMATS[format];if(!f)throw new RangeError('Format d’étiquette inconnu.');if(!labels.length)throw new RangeError('Aucune pièce placée à étiqueter.');
+ const count=f.columns*f.rows,pages=[];for(let i=0;i<labels.length;i+=count)pages.push(`<section class="label-page">${labels.slice(i,i+count).map(labelMarkup).join('')}</section>`);
+ return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>WoodPilot — Étiquettes</title><style>
+ @page{size:${f.page};margin:${f.margin}}*{box-sizing:border-box}body{margin:0;background:#eee;color:#111;font-family:Arial,sans-serif}.toolbar{padding:16px;max-width:900px;margin:auto}.toolbar button{font:inherit;padding:12px 20px}.toolbar p{line-height:1.4}.label-page{display:grid;grid-template-columns:repeat(${f.columns},${f.width}mm);grid-template-rows:repeat(${f.rows},${f.height}mm);width:${f.columns*f.width}mm;height:${f.rows*f.height}mm;background:white;margin:20px auto;break-after:page}.label-page:last-child{break-after:auto}.piece-label-print{padding:2mm 2.5mm;min-width:0;outline:1px dashed #aaa;display:flex;flex-direction:column;justify-content:center;gap:.5mm;overflow:hidden;font-size:8pt;line-height:1.1;overflow-wrap:anywhere}.label-id{display:flex;justify-content:space-between;gap:2mm;font-size:7pt}.label-id strong{font-size:10pt}.label-project{font-size:7pt}.label-name{font-weight:bold;font-size:8pt}.label-size{font-size:11pt;font-weight:bold}.label-meta,.label-date{font-size:7pt}
+ @media print{body{background:white}.toolbar{display:none}.label-page{margin:0}.piece-label-print{outline:none;break-inside:avoid}}
+ </style></head><body><div class="toolbar"><h1>Étiquettes WoodPilot</h1><p>${labels.length} étiquette(s) · ${escape(f.name)}. Imprimez à taille réelle (100 %), sans en-têtes ni pieds de page. Vérifiez le format avec votre support. L’aperçu peut aussi être enregistré en PDF depuis le dialogue d’impression.</p><button id="print-labels" type="button">Imprimer les étiquettes</button></div>${pages.join('')}<script>document.getElementById('print-labels').addEventListener('click',()=>window.print());</script></body></html>`;
+}

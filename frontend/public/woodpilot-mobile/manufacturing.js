@@ -1,5 +1,5 @@
 import { validateNestingDetails } from './nesting-details.js';
-import { solvePanelNesting } from '../agencement-configurator/panel-nesting.js';
+import { solveReusableNesting } from './nesting-optimizer.js';
 export function validateCutList(data) {
   if(!data||!data.panel||!Array.isArray(data.pieces)||data.pieces.length>100)throw new RangeError('Liste de débit invalide (maximum 100 lignes).');
   validateNestingDetails(data);
@@ -23,7 +23,7 @@ export function calculateNesting(data) {
   const margin=data.panel.edgeMarginMm??0;
   const usable={...data.panel,lengthMm:data.panel.lengthMm-2*margin,widthMm:data.panel.widthMm-2*margin};
   return [...groups].map(([thickness,pieces])=>{
-    const result=solvePanelNesting(usable,pieces);
+    const result=solveReusableNesting(usable,pieces);
     if(data.sourceOffcut&&result.panels.length>1){result.overflowPieces.push(...result.panels.slice(1).flatMap(panel=>panel.pieces));result.panels=result.panels.slice(0,1);}
     for(const panel of result.panels)for(const rect of [...panel.pieces,...panel.freeRects]){rect.x+=margin;rect.y+=margin;}
     result.panelLengthMm=data.panel.lengthMm;result.panelWidthMm=data.panel.widthMm;

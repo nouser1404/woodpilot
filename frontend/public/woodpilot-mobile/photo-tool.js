@@ -20,7 +20,7 @@ export function createPhotoTool({notify,haptic,transfer}) {
   let worker;try{worker=new Worker(new URL('./edge-worker.js',import.meta.url),{type:'module'});}catch{}
   if(worker)worker.onerror=()=>{worker.terminate();worker=null;segments=[];detection.textContent='Détection indisponible ; tracé manuel disponible.';render();};
   const detection=root.querySelector('[data-detection-status]');
-  function detect(){if(!image)return;const id=++generation;segments=[];const small=document.createElement('canvas'),ratio=Math.min(1,360/Math.max(image.width,image.height));small.width=Math.max(3,Math.round(image.width*ratio));small.height=Math.max(3,Math.round(image.height*ratio));const ctx=small.getContext('2d');ctx.drawImage(image,0,0,small.width,small.height);detection.textContent='Recherche des arêtes…';if(!worker){detection.textContent='Détection indisponible ; tracez les cotes manuellement.';return;}const pixels=ctx.getImageData(0,0,small.width,small.height);worker.postMessage({id,image:{width:small.width,height:small.height,data:pixels.data}},[pixels.data.buffer]);}
+  function detect(){if(!image)return;const id=++generation;segments=[];const small=document.createElement('canvas'),ratio=Math.min(1,960/Math.max(image.width,image.height));small.width=Math.max(3,Math.round(image.width*ratio));small.height=Math.max(3,Math.round(image.height*ratio));const ctx=small.getContext('2d');ctx.drawImage(image,0,0,small.width,small.height);detection.textContent='Recherche des arêtes…';if(!worker){detection.textContent='Détection indisponible ; tracez les cotes manuellement.';return;}const pixels=ctx.getImageData(0,0,small.width,small.height);worker.postMessage({id,image:{width:small.width,height:small.height,data:pixels.data}},[pixels.data.buffer]);}
   if(worker)worker.onmessage=event=>{if(event.data.id!==generation)return;segments=event.data.segments||[];detection.textContent=event.data.error?'Détection indisponible ; tracé manuel disponible.':`${segments.length} arête(s) proposées. Touchez une arête pour la coter.`;render();};
   const error=root.querySelector('[role="alert"]');
   function render() {
@@ -42,7 +42,7 @@ export function createPhotoTool({notify,haptic,transfer}) {
         ctx.fillStyle=styles.getPropertyValue('--color-text').trim();ctx.textAlign='center';ctx.fillText(text,x,y);
       }
     }
-    if(root.querySelector('[data-show-edges]').checked){ctx.save();ctx.strokeStyle=styles.getPropertyValue('--color-construction-line').trim();ctx.lineWidth=2*scale;ctx.setLineDash([5*scale,4*scale]);segments.forEach(line=>{ctx.beginPath();ctx.moveTo(line.a.x*canvas.width,line.a.y*canvas.height);ctx.lineTo(line.b.x*canvas.width,line.b.y*canvas.height);ctx.stroke();});ctx.restore();}
+    if(root.querySelector('[data-show-edges]').checked){ctx.save();ctx.strokeStyle=styles.getPropertyValue('--color-construction-line').trim();ctx.lineWidth=3*scale;ctx.setLineDash([5*scale,4*scale]);segments.forEach(line=>{ctx.beginPath();ctx.moveTo(line.a.x*canvas.width,line.a.y*canvas.height);ctx.lineTo(line.b.x*canvas.width,line.b.y*canvas.height);ctx.stroke();});ctx.restore();}
     if(selectedSegment)segment(selectedSegment.a,selectedSegment.b);
     lines.forEach(line=>segment(line.a,line.b,line.unreliable?undefined:line.value));
     const outline=calibrated.outline;
@@ -101,7 +101,7 @@ export function createPhotoTool({notify,haptic,transfer}) {
     if(!dragStart)return;const end=point(event),start=dragStart;dragStart=null;const rect=canvas.getBoundingClientRect(),dragDistance=Math.hypot((start.x-end.x)*rect.width,(start.y-end.y)*rect.height);
     if(calibrated.mode==='calibrated'&&calibrated.referencePoint(end))return;
     if(annotationMode){annotationMode=false;if(annotations.length>=30){notify('Maximum : 30 annotations.');return;}editText({title:'Annotation',maxLength:120,onConfirm(text){if(text){annotations.push({point:end,text});render();}}});return;}
-    if(calibrated.mode==='manual'&&!pending&&dragDistance<=4&&root.querySelector('[data-show-edges]').checked){const rect=canvas.getBoundingClientRect(),edge=closestSegment(end,segments,rect.width,rect.height);if(edge){finish(edge.a,edge.b);return;}}
+    if(!pending&&dragDistance<=4&&root.querySelector('[data-show-edges]').checked){const rect=canvas.getBoundingClientRect(),edge=closestSegment(end,segments,rect.width,rect.height);if(edge){finish(edge.a,edge.b);return;}}
     if(dragDistance>4){finish(start,end);return;}
     if(pending)finish(pending,end);else{pending=end;render();notify('Touchez le second point de la cote.');}
   };

@@ -1,3 +1,5 @@
+import {createNestingLabels} from './nesting-labels-ui.js';
+import {createPieceForm} from './piece-form.js';
 import { ELEMENT_NAMES,MATERIALS,edgeDescription,nestingReport } from './nesting-details.js';
 import { drawNestingPanel } from './nesting-plan.js';
 import { recoverableOffcuts } from './offcuts.js';
@@ -10,6 +12,8 @@ export function createCutListTool({notify,haptic}) {
   let data={panel:{lengthMm:2800,widthMm:2070,sawKerfMm:3,edgeMarginMm:20},pieces:[]};
   const root=document.querySelector('#cutlistTool'),pieceSheet=document.querySelector('#pieceSheet');
   let editingIndex=null,draft,activePanel=0;
+  const labelTool=createNestingLabels(()=>data,notify);
+  root.querySelector('[data-labels]').onclick=()=>labelTool.open();
   const preset=pieceSheet.querySelector('[data-piece-preset]');
   for(const name of [...ELEMENT_NAMES,'Autre']){const option=document.createElement('option');option.value=name;option.textContent=name;preset.append(option);}
   const material=root.querySelector('[data-material]');
@@ -17,6 +21,7 @@ export function createCutListTool({notify,haptic}) {
   material.onchange=()=>{data.material=material.value;render();};
   root.querySelector('[data-cutlist-project]').oninput=event=>{data.projectName=event.target.value.trim();};
   preset.onchange=()=>{pieceSheet.querySelector('[data-custom-name]').hidden=preset.value!=='Autre';};
+  const pieceForm=createPieceForm(pieceSheet);
   const labels={lengthMm:'Longueur',widthMm:'Largeur',thicknessMm:'Épaisseur',quantity:'Quantité'};
   function render() {
     validateCutList(data);
@@ -52,11 +57,11 @@ export function createCutListTool({notify,haptic}) {
     root.querySelector('[data-overflow-count]').textContent=!data.pieces.length?'Ajoutez des pièces ou importez celles du caisson.':overflow?`${overflow} pièce(s) ${data.sourceOffcut?'non placée(s) sur cette chute':'hors format'} — plan incomplet`:'Toutes les pièces tiennent dans le format choisi.';
     root.querySelector('[data-overflow-count]').classList.toggle('nesting-overflow',overflow>0);
   }
-  function renderDraft() {for(const key of Object.keys(labels))pieceSheet.querySelector(`[data-value="${key}"]`).textContent=`${formatMeasure(draft[key])}${key==='quantity'?'':' mm'}`;}
+  function renderDraft() {pieceForm.update(draft);for(const key of Object.keys(labels))pieceSheet.querySelector(`[data-value="${key}"]`).textContent=`${formatMeasure(draft[key])}${key==='quantity'?'':' mm'}`;}
   function openPiece(index=null) {
     if(index===null&&data.pieces.length>=100){notify('Maximum : 100 lignes.');return;}
     editingIndex=index;draft=index===null?{name:'Tablette',lengthMm:600,widthMm:400,thicknessMm:19,quantity:1,allowRotation:false}:{...data.pieces[index]};
-    preset.value=ELEMENT_NAMES.includes(draft.name)?draft.name:'Autre';preset.onchange();pieceSheet.querySelectorAll('[data-edge]').forEach(input=>input.checked=Boolean(draft[input.dataset.edge]));pieceSheet.querySelector('[data-piece-name]').value=draft.name;pieceSheet.querySelector('[data-rotation]').checked=draft.allowRotation;pieceSheet.querySelector('[role="alert"]').textContent='';renderDraft();pieceSheet.showModal();
+    preset.value=ELEMENT_NAMES.includes(draft.name)?draft.name:'Autre';preset.onchange();pieceSheet.querySelectorAll('[data-edge]').forEach(input=>input.checked=Boolean(draft[input.dataset.edge]));pieceSheet.querySelector('[data-piece-name]').value=draft.name;pieceSheet.querySelector('[data-rotation]').checked=draft.allowRotation;pieceSheet.querySelector('[role="alert"]').textContent='';renderDraft();pieceForm.reset();pieceSheet.showModal();
   }
   pieceSheet.querySelectorAll('[data-measurement]').forEach(button=>button.onclick=()=>{
     const key=button.dataset.measurement;

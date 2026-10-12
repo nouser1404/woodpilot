@@ -1,3 +1,6 @@
+import {createStairsTool} from './stairs-tool.js';
+import {calculateStairLayout} from './stairs-layout.js';
+import {installCalculatorSteps,installCutlistSteps} from './guided-tools.js';
 import { createRalTool } from './ral-tool.js';
 import { validateRalSelection } from './ral-model.js';
 import { createInclinometerTool } from './inclinometer-tool.js';
@@ -29,6 +32,7 @@ import { calculateAretiers } from './aretiers.js';
 import { validatePhoto } from './photo-model.js';
 import { generateCabinet,validateCutList } from './manufacturing.js';
 const catalog=[
+  {id:'stairs',name:'Escalier',icon:'diagonal_line',desc:'Escaliers droits, tournants, à paliers et hélicoïdaux.',cat:'CALCULER'},
   {id:'ral',name:'RAL Picker',icon:'palette',desc:'Chercher une teinte et les RAL proches d’une photo.',cat:'CHANTIER'},
   {id:'inclino',name:'Inclinomètre',icon:'architecture',desc:'Mesurer et mémoriser une pente, écran contre la surface.',cat:'MÉTRER'},
   {id:'voice',name:'Notes vocales',icon:'mic',desc:'Enregistrer et réécouter les rappels de chantier.',cat:'CHANTIER'},
@@ -55,7 +59,7 @@ async function share(data) {
   downloadBlob(new Blob([data.text],{type:'text/plain;charset=utf-8'}),'woodpilot-resultat.txt');notify('Résultat téléchargé.');
 }
 const controllers={
-  ral:createRalTool({notify}),inclino:createInclinometerTool({haptic}),voice:createVoiceTool({notify}),level:createLevelTool(),helix:createHelixTool({haptic}),triangle:createTriangleTool({haptic}),
+  stairs:createStairsTool({haptic}),ral:createRalTool({notify}),inclino:createInclinometerTool({haptic}),voice:createVoiceTool({notify}),level:createLevelTool(),helix:createHelixTool({haptic}),triangle:createTriangleTool({haptic}),
   bending:createBendingTool({haptic}),slope:createSlopeTool({haptic}),angles:createAnglesTool({haptic}),
   spacing:createSpacingTool({haptic}),photo:createPhotoTool({notify,haptic,transfer(dimensions){controllers.cabinet.applyDimensions(dimensions);controllers.photo.root.close();openTool('cabinet');}}),aretiers:createAretiersTool({haptic,notify}),
   cutlist:createCutListTool({notify,haptic}),
@@ -65,7 +69,7 @@ controllers.cabinet=createCabinetTool({notify,haptic,transfer(pieces){
   if(controllers.cutlist.hasPieces()&&!confirm('Remplacer la liste de débit actuelle ? Enregistrez-la dans un projet pour la conserver.'))return;
   controllers.cutlist.replacePieces(pieces);controllers.cabinet.root.close();openTool('cutlist');
 }});
-const validators={ral:validateRalSelection,inclino:validateInclination,helix:calculateHelix,triangle:calculateTriangle,offcuts:validateOffcutsSnapshot,bending:d=>calculateBending(d.chord,d.sagitta),slope:d=>calculateSlope(d.run,d.rise),angles:d=>calculateMiter(d.angle),spacing:d=>calculateSpacing(d.length,d.width,d.count,d.endGaps),photo:validatePhoto,aretiers:calculateAretiers,cabinet:generateCabinet,cutlist:validateCutList};
+const validators={stairs:calculateStairLayout,ral:validateRalSelection,inclino:validateInclination,helix:calculateHelix,triangle:calculateTriangle,offcuts:validateOffcutsSnapshot,bending:d=>calculateBending(d.chord,d.sagitta),slope:d=>calculateSlope(d.run,d.rise),angles:d=>calculateMiter(d.angle),spacing:d=>calculateSpacing(d.length,d.width,d.count,d.endGaps),photo:validatePhoto,aretiers:calculateAretiers,cabinet:generateCabinet,cutlist:validateCutList};
 let opener;
 function openTool(id){opener=document.activeElement;controllers[id==='nesting'?'cutlist':id]?.open();}
 const projects=createProjectsUI({tools:controllers,openTool,notify});
@@ -76,7 +80,7 @@ Object.entries(controllers).forEach(([id,tool])=>{
   tool.root.querySelectorAll('[data-close],#closeBending,#closeSlope').forEach(button=>button.onclick=()=>tool.root.close());
 });
 document.querySelectorAll('#measurementSheet,#pieceSheet,#projectDetail,#saveSheet,#exportSheet,#projectNameSheet').forEach(dialog=>dialog.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>dialog.close()));
-let favourites=catalog.filter(tool=>!['level','triangle','helix','voice','inclino','ral'].includes(tool.id)).slice(0,8).map(tool=>tool.id);
+let favourites=catalog.filter(tool=>!['stairs','level','triangle','helix','voice','inclino','ral'].includes(tool.id)).slice(0,8).map(tool=>tool.id);
 try{const saved=JSON.parse(localStorage.getItem('woodpilot-tools-favourites'));if(Array.isArray(saved)&&saved.length>=1&&saved.length<=8&&new Set(saved).size===saved.length&&saved.every(id=>catalog.some(tool=>tool.id===id)))favourites=saved;}catch{}
 const favouriteEditor=createFavouritesEditor({catalog,getIds:()=>favourites,onChange(ids){favourites=ids;selected=0;rotation=0;try{localStorage.setItem('woodpilot-tools-favourites',JSON.stringify(ids));}catch{notify('Ordre non conservé sur cet appareil.');}renderWheel();}});
 document.querySelector('[data-reorder-wheel]').onclick=()=>favouriteEditor.open();
@@ -133,7 +137,7 @@ function syncAppearance(){
 syncAppearance();
 appearance.addEventListener('change',syncAppearance);
 window.addEventListener('resize',()=>{if(document.querySelector('[data-view="wheel"]').classList.contains('active'))renderWheel();});
-renderWheel();renderLibrary();installToolHelp();
+renderWheel();renderLibrary();installToolHelp();installCalculatorSteps(controllers);installCutlistSteps(controllers.cutlist);
 const offlineStatus=document.querySelector('#offlineStatus');
 keepScreenAwake({onStatus(state){
   const status=document.querySelector('#screenAwakeStatus');

@@ -14,7 +14,12 @@ export function drawNestingPanel(format,panel,title){
   for(const p of panel.pieces){
     const {x,y,lengthMm:l,widthMm:w}=p;
     node('rect',{x,y,width:l,height:w,class:'slat'});
-    node('text',{x:x+l/2,y:y+w/2,class:'piece-label','font-size':Math.min(60,w/2,l/3)},p.code);
+    const code=String(p.code),horizontal=`${formatMeasure(l)} mm`,vertical=`${formatMeasure(w)} mm`;
+    node('text',{x:x+l/2,y:y+w/2,class:'piece-label','font-size':Math.min(60,w/4,l/(code.length*.65+2))},code);
+    node('text',{x:x+l/2,y:y+w*.82,class:'piece-label piece-dimension','font-size':Math.min(46,w/6,l/(horizontal.length*.65+2))},horizontal);
+    const vx=x+l*.15,vy=y+w/2;
+    node('text',{x:vx,y:vy,class:'piece-label piece-dimension','font-size':Math.min(46,l/6,w/(vertical.length*.65+2)),transform:`rotate(-90 ${vx} ${vy})`},vertical);
+
     const lines=[[x,y,x+l,y],[x+l,y,x+l,y+w],[x,y+w,x+l,y+w],[x,y,x,y+w]];
     displayedEdges(p).forEach((enabled,i)=>{if(enabled){const [x1,y1,x2,y2]=lines[i];node('line',{x1,y1,x2,y2,class:'panel-edge','stroke-width':Math.max(L,W)*.0025,'stroke-dasharray':`${Math.max(L,W)*.008} ${Math.max(L,W)*.004}`});}});
   }
