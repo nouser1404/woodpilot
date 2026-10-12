@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {validateSuppliers,filterSuppliers,SUPPLIER_COUNTRIES,SUPPLIER_AREAS,supplierDirections} from '../public/woodpilot-mobile/suppliers-model.js';
+const directory=new URL('../public/woodpilot-mobile/suppliers/',import.meta.url);
+const read=name=>JSON.parse(readFileSync(new URL(name,directory),'utf8'));
+const extra=read('community-suppliers.json'),curated=read('suppliers.json');
+test('national catalog preserves curated IDs and validates unique community records',()=>{assert.equal(validateSuppliers([...curated,...extra]).length,curated.length+extra.length);assert.equal(curated.length,62);assert.ok(extra.length>7000);assert.ok(extra.every(s=>s.sourceType==='open_data'&&s.tags.length===0&&s.url.startsWith('https://www.openstreetmap.org/')));});
+test('all terrestrial neighbors have entries within conservative boundary limit',()=>{for(const c of Object.keys(SUPPLIER_COUNTRIES)){assert.ok(extra.some(s=>s.country===c),c);}for(const s of extra.filter(s=>s.country!=='FR'))assert.ok(s.borderDistanceUpperBoundKm>=0&&s.borderDistanceUpperBoundKm<=49);const foreign=extra.find(s=>s.country!=='FR');assert.throws(()=>validateSuppliers([{...foreign,borderDistanceUpperBoundKm:50}]));});
+test('country names, departments and missing addresses remain searchable',()=>{assert.ok(filterSuppliers(extra,{search:'Suisse'}).every(s=>s.country==='CH'||JSON.stringify(s).includes('Suisse')));assert.ok(SUPPLIER_AREAS['2A']);assert.ok(extra.some(s=>s.department==='2A'));assert.ok(extra.some(s=>s.department==='2B'));assert.ok(extra.some(s=>s.address.startsWith('Adresse non renseignée')));const s=extra[0];assert.ok(supplierDirections(s).includes(encodeURIComponent(`${s.lat},${s.lon}`)));});
+test('metadata and alias registry match generated records',()=>{const m=read('catalog-metadata.json'),aliases=read('osm-id-map.json');assert.equal(Object.values(m.countries).reduce((a,b)=>a+b,0),extra.length);assert.equal(m.exhaustive,false);for(const s of extra)assert.equal(aliases[s.url.replace('https://www.openstreetmap.org/','')],s.id);});
+test('national CSV includes every entry and marks community provenance',()=>{const text=readFileSync(new URL('catalogue-national.csv',directory),'utf8');assert.equal(text.trim().split('\n').length,extra.length+curated.length+1);assert.ok(text.includes('Communautaire, à confirmer'));});

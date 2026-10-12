@@ -30,3 +30,15 @@ Géocodage des 11 adresses via Géoplateforme IGN / BAN ; libellés et communes 
 Sources complémentaires utiles : [services Dacher](https://www.dacher.fr/services.php), [services Tugny Wood Stock](https://tugny-wood-stock.fr/services/), [services Reims Bois](https://reims-bois.fr/services/). Les liens principaux des onze établissements sont dans `suppliers.json` et le CSV.
 
 Maintenance : `python3 scripts/mobile/validate-suppliers.py` contrôle les données et la correspondance exacte du CSV. Après modification du JSON, `python3 scripts/mobile/validate-suppliers.py --write-csv` régénère le CSV. Attribuer de nouveaux IDs sans recycler les anciens.
+
+## Catalogue national communautaire
+
+La sélection d’origine (62 fiches) reste indépendante. Le catalogue complémentaire est extrait d’OpenStreetMap : commerces de bricolage, quincaillerie, peinture, bois et matériaux, scieries et affûtage. Les activités et prestations ne sont pas vérifiées auprès des établissements. Une activité absente d’OSM n’est pas inventée (notamment l’usinage). Le catalogue est non exhaustif ; une adresse absente de la source reste explicitement non renseignée.
+
+Périmètre : France métropolitaine (Corse incluse), Belgique, Luxembourg, Allemagne, Suisse, Italie, Espagne, Andorre, Monaco. Aucun territoire ultramarin ni frontière maritime. Les voisins sont retenus uniquement si la distance au sommet le plus proche d’une frontière terrestre commune OSM est au plus 49 km : ce majorant cartographique garde 1 km de sécurité pour la limite demandée de 50 km. Ce contrôle n’est pas une mesure cadastrale ni routière.
+
+Les départements proviennent du point dans les contours france-geojson (IGN/INSEE). Les sites sans correspondance sont signalés comme département non renseigné. La carte regroupe les repères selon le zoom ; la liste montre 40 fiches puis « Afficher davantage ». Les favoris existants conservent leurs identifiants.
+
+Maintenance : `python3 scripts/mobile/import-osm-suppliers.py RAW_DIRECTORY`. Le répertoire doit contenir FR/BE/LU/DE/CH/IT/ES/AD/MC.json (réponses Overpass avec coordonnées), borders.json (voies partagées de frontières administratives de niveau 2, géométries) et department-polygons.json. Une extraction manquante bloque l’import. Les lieux sans nom ou signalés fermés et les doublons proches sont écartés. Inspecter catalog-metadata.json et lancer les tests avant publication. L’extraction nécessite une revue périodique : pas de synchronisation automatique des établissements.
+
+Les fichiers communautaires sont sous ODbL ; conserver l’attribution OpenStreetMap et les obligations de partage à l’identique en redistribuant cette base. Sources, date d’extraction et limites sont visibles dans « Sources et export » et dans chaque fiche communautaire.

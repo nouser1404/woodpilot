@@ -18,3 +18,11 @@ Les coordonnées commerciales proviennent des sources publiques officielles
 indiquées dans chaque fiche. La consultation et la date ne garantissent
 ni l’exhaustivité ni la disponibilité commerciale. Aucun logo, photographie
 ou texte commercial long de fournisseur n’a été incorporé.
+
+Catalogue communautaire national : © les contributeurs OpenStreetMap.
+Données community-suppliers.json et catalogue-national.csv sous ODbL 1.0 :
+https://www.openstreetmap.org/copyright
+https://opendatacommons.org/licenses/odbl/1-0/
+Fiches fournisseurs.json originales conservées séparément.
+Contours départementaux de france-geojson (Grégoire David, IGN/INSEE),
+https://github.com/gregoiredavid/france-geojson (licence ouverte).

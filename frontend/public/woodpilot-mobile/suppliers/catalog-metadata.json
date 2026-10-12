@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-12",
+  "license": "ODbL-1.0",
+  "source": "https://www.openstreetmap.org/copyright",
+  "exhaustive": false,
+  "countries": {
+    "FR": 7664,
+    "BE": 545,
+    "LU": 38,
+    "DE": 540,
+    "CH": 268,
+    "IT": 349,
+    "ES": 211,
+    "AD": 2,
+    "MC": 2
+  },
+  "borderMethod": "Distance au sommet le plus proche des frontières terrestres communes OSM, majorant cartographique ; seuil 49 km pour une limite de 50 km.",
+  "departments": 97
+}
