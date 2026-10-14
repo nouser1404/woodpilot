@@ -39,7 +39,7 @@ export function createPieceForm(sheet){
     step=next;groups.forEach((group,i)=>group.hidden=i!==step);
     heading.querySelector('small').textContent=`Étape ${step+1} / 3`;
     heading.querySelector('h3').textContent=['Nom de la pièce','Dimensions et quantité','Chants et sens du fil'][step];
-    heading.querySelector('p').textContent=['Choisissez l’élément à débiter.','Touchez une cote pour la modifier.','Touchez les côtés à plaquer. Les côtés sélectionnés apparaissent en orange.'][step];
+    heading.querySelector('p').textContent=['Choisissez l’élément à débiter.','Touchez une cote pour la modifier.','Touchez les côtés à plaquer. Les côtés sélectionnés apparaissent en rouge.'][step];
     nav.children[0].hidden=step===0;nav.children[1].hidden=step===2;submit.hidden=step!==2;
     if(focus&&sheet.open)heading.querySelector('h3').focus();
   }

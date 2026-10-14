@@ -181,3 +181,8 @@ Résultat signé au millimètre (une variation non nulle inférieure à 0,5 mm r
 Code : `hygrometry.js` (données sourcées et moteur pur), `hygrometry-tool.js` (interface), icône SVG locale. Aucun capteur de température ou d’humidité supposé présent dans le téléphone. Fonctionnement hors connexion.
 
 Source des coefficients et formule de mouvement : https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/14665/14665-dossier-source.pdf . Origine du modèle d’équilibre : https://www.fpl.fs.usda.gov/documnts/pdf1973/simps73a.pdf . Coefficients et modèle vérifiés le 14/10/2026.
+
+### Identité visuelle et chutes (14/10/2026)
+Palette : primaire #DC2E2E, secondaire #60d394, tertiaire #ffd97d. Le rouge porte les actions et les chants, le vert les états actifs des capteurs, le jaune les repères d’étape et avertissements. Les encres de texte sont adaptées au fond clair/sombre ; les trois couleurs de référence restent identiques. Descriptions, aides, légendes et libellés secondaires à 12 px, champs de saisie à 16 px pour conserver la lisibilité et éviter le zoom mobile. Les dimensions principales et les zones tactiles gardent leur taille.
+
+Les plans de calpinage hachurent la surface utile restante derrière les pièces opaques, ce qui exclut les pièces et conserve le repérage des chants. Les petites pertes de trait de scie sont également visibles comme zones non occupées. La marge de rafraîchissement conserve sa limite distincte. Motifs SVG locaux, identifiants uniques pour plusieurs panneaux ; export image/PDF avec hachures grises en mode papier et références de motifs internes conservées. Les hachures ne prétendent pas que toutes ces surfaces sont des chutes récupérables.
