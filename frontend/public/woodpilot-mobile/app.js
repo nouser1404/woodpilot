@@ -1,3 +1,5 @@
+import {createHygrometryTool} from './hygrometry-tool.js';
+import {calculateHygrometry} from './hygrometry.js';
 import {createSuppliersTool} from './suppliers-tool.js';
 import {createStairsTool} from './stairs-tool.js';
 import {calculateStairLayout} from './stairs-layout.js';
@@ -33,6 +35,7 @@ import { calculateAretiers } from './aretiers.js';
 import { validatePhoto } from './photo-model.js';
 import { generateCabinet,validateCutList } from './manufacturing.js';
 const catalog=[
+  {id:'hygrometry',name:'Variation hygrométrique',icon:'hygrometry',desc:'Prévoir le retrait et la dilatation du bois massif.',cat:'CALCULER'},
   {id:'suppliers',name:'Fournisseurs',icon:'storefront',desc:'Adresses, carte et contacts pour l’atelier.',cat:'CHANTIER'},
   {id:'stairs',name:'Escalier',icon:'diagonal_line',desc:'Escaliers droits, tournants, à paliers et hélicoïdaux.',cat:'CALCULER'},
   {id:'ral',name:'Palette de couleurs',icon:'palette',desc:'RAL, décors mélaminés et textures de panneaux.',cat:'CHANTIER'},
@@ -61,6 +64,7 @@ async function share(data) {
   downloadBlob(new Blob([data.text],{type:'text/plain;charset=utf-8'}),'woodpilot-resultat.txt');notify('Résultat téléchargé.');
 }
 const controllers={
+  hygrometry:createHygrometryTool({haptic}),
   suppliers:createSuppliersTool({notify}),
   stairs:createStairsTool({haptic}),ral:createRalTool({notify}),inclino:createInclinometerTool({haptic}),voice:createVoiceTool({notify}),level:createLevelTool(),helix:createHelixTool({haptic}),triangle:createTriangleTool({haptic}),
   bending:createBendingTool({haptic}),slope:createSlopeTool({haptic}),angles:createAnglesTool({haptic}),
@@ -72,7 +76,7 @@ controllers.cabinet=createCabinetTool({notify,haptic,transfer(pieces){
   if(controllers.cutlist.hasPieces()&&!confirm('Remplacer la liste de débit actuelle ? Enregistrez-la dans un projet pour la conserver.'))return;
   controllers.cutlist.replacePieces(pieces);controllers.cabinet.root.close();openTool('cutlist');
 }});
-const validators={stairs:calculateStairLayout,ral:validateRalSelection,inclino:validateInclination,helix:calculateHelix,triangle:calculateTriangle,offcuts:validateOffcutsSnapshot,bending:d=>calculateBending(d.chord,d.sagitta),slope:d=>calculateSlope(d.run,d.rise),angles:d=>calculateMiter(d.angle),spacing:d=>calculateSpacing(d.length,d.width,d.count,d.endGaps),photo:validatePhoto,aretiers:calculateAretiers,cabinet:generateCabinet,cutlist:validateCutList};
+const validators={hygrometry:calculateHygrometry,stairs:calculateStairLayout,ral:validateRalSelection,inclino:validateInclination,helix:calculateHelix,triangle:calculateTriangle,offcuts:validateOffcutsSnapshot,bending:d=>calculateBending(d.chord,d.sagitta),slope:d=>calculateSlope(d.run,d.rise),angles:d=>calculateMiter(d.angle),spacing:d=>calculateSpacing(d.length,d.width,d.count,d.endGaps),photo:validatePhoto,aretiers:calculateAretiers,cabinet:generateCabinet,cutlist:validateCutList};
 let opener;
 function openTool(id){opener=document.activeElement;controllers[id==='nesting'?'cutlist':id]?.open();}
 const projects=createProjectsUI({tools:controllers,openTool,notify});
@@ -94,13 +98,13 @@ function renderWheel() {
   const tools=wheelTools(),step=360/tools.length,radius=Math.min(165,(stage.clientWidth-72)/2);
   selected=Math.min(selected,tools.length-1);wheel.replaceChildren();
   tools.forEach((tool,index)=>{const angle=(index*step-90)*Math.PI/180,button=document.createElement('button');
-    button.className='tool-node'+(index===selected?' selected':'');button.setAttribute('aria-label',tool.name);button.setAttribute('aria-pressed',String(index===selected));button.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded${tool.icon==='storefront'?' supplier-icon':tool.icon==='diagonal_line'?' diagonal-icon':''}">${tool.icon}</span>`;
+    button.className='tool-node'+(index===selected?' selected':'');button.setAttribute('aria-label',tool.name);button.setAttribute('aria-pressed',String(index===selected));button.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded${tool.icon==='hygrometry'?' hygrometry-icon':tool.icon==='storefront'?' supplier-icon':tool.icon==='diagonal_line'?' diagonal-icon':''}">${tool.icon}</span>`;
     button.style.transform=`translate(${Math.cos(angle)*radius}px,${Math.sin(angle)*radius}px) rotate(${-rotation}deg)`;
     let holdTimer;button.onpointerdown=()=>holdTimer=setTimeout(()=>{suppressClick=true;favouriteEditor.open();},650);button.onpointerup=button.onpointercancel=button.onpointerleave=()=>clearTimeout(holdTimer);
     button.onclick=()=>{if(suppressClick)return;select(index);wheel.children[index].focus();};wheel.append(button);
   });
   wheel.style.transform=`rotate(${rotation}deg)`;
-  const tool=tools[selected];document.querySelector('#selectedName').textContent=tool.name;document.querySelector('#selectedDesc').textContent=tool.desc;document.querySelector('#centerIcon').textContent=tool.icon;document.querySelector('#centerIcon').classList.toggle('diagonal-icon',tool.icon==='diagonal_line');document.querySelector('#centerIcon').classList.toggle('supplier-icon',tool.icon==='storefront');
+  const tool=tools[selected];document.querySelector('#selectedName').textContent=tool.name;document.querySelector('#selectedDesc').textContent=tool.desc;document.querySelector('#centerIcon').textContent=tool.icon;document.querySelector('#centerIcon').classList.toggle('diagonal-icon',tool.icon==='diagonal_line');document.querySelector('#centerIcon').classList.toggle('supplier-icon',tool.icon==='storefront');document.querySelector('#centerIcon').classList.toggle('hygrometry-icon',tool.icon==='hygrometry');
   document.querySelector('#openTool').setAttribute('aria-label',`Ouvrir ${tool.name}`);
 }
 function select(index){const next=(index+favourites.length)%favourites.length;let delta=next-selected;if(delta>favourites.length/2)delta-=favourites.length;if(delta<-favourites.length/2)delta+=favourites.length;rotation-=delta*360/favourites.length;selected=next;haptic();renderWheel();}
@@ -126,7 +130,7 @@ function renderLibrary(filter='') {
   const filtered=catalog.filter(tool=>normalize(tool.name).includes(normalize(filter)));
   if(!filtered.length){root.textContent='Aucun outil trouvé.';return;}
   [...new Set(filtered.map(tool=>tool.cat))].forEach(category=>{const group=document.createElement('section');group.className='library-group';const heading=document.createElement('h3');heading.textContent=category;group.append(heading);
-    filtered.filter(tool=>tool.cat===category).forEach(tool=>{const row=document.createElement('div');row.className='library-item';const open=document.createElement('button');open.className='library-row';open.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded${tool.icon==='storefront'?' supplier-icon':tool.icon==='diagonal_line'?' diagonal-icon':''}">${tool.icon}</span><span>${tool.name}<small>${tool.desc}</small></span><span aria-hidden="true" class="material-symbols-rounded">chevron_right</span>`;open.onclick=()=>openTool(tool.id);
+    filtered.filter(tool=>tool.cat===category).forEach(tool=>{const row=document.createElement('div');row.className='library-item';const open=document.createElement('button');open.className='library-row';open.innerHTML=`<span aria-hidden="true" class="material-symbols-rounded${tool.icon==='hygrometry'?' hygrometry-icon':tool.icon==='storefront'?' supplier-icon':tool.icon==='diagonal_line'?' diagonal-icon':''}">${tool.icon}</span><span>${tool.name}<small>${tool.desc}</small></span><span aria-hidden="true" class="material-symbols-rounded">chevron_right</span>`;open.onclick=()=>openTool(tool.id);
       const favourite=document.createElement('button');favourite.className='icon-btn favourite';favourite.innerHTML='<span aria-hidden="true" class="material-symbols-rounded">star</span>';favourite.setAttribute('aria-pressed',String(favourites.includes(tool.id)));favourite.setAttribute('aria-label',`${favourites.includes(tool.id)?'Retirer':'Ajouter'} ${tool.name} ${favourites.includes(tool.id)?'de':'à'} la toolbox`);favourite.onclick=()=>toggleFavourite(tool.id);row.append(open,favourite);group.append(row);
     });root.append(group);
   });

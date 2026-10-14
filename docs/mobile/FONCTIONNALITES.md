@@ -167,3 +167,17 @@ L’outil Palette de couleurs conserve l’identifiant `ral` et les sélections 
 Aperçus © Pfleiderer chargés directement depuis le fabricant, à la demande lors de l’ouverture des vues ; pas de copie des images dans l’archive ni dans le cache hors connexion de l’application. Hors connexion les références restent disponibles avec un message explicite si l’aperçu ne charge pas. Les vignettes ne garantissent pas la couleur, l’échelle du motif ni le relief réel. La fiche fabricant permet de vérifier les variantes et échantillons. Catalogue non exhaustif, sans garantie de stock ; confirmer sur échantillon physique.
 
 Sources : https://www.pfleiderer.com/fr-fr/produits/decors/detailler/u17005 et les URLs de chaque fiche dans le catalogue ; collection https://www.pfleiderer.com/fr-fr/collection-2025-2028 .
+
+## Variation hygrométrique
+
+Calculateur de mouvement du bois massif, ajouté à la bibliothèque d’outils sans modifier les huit favoris existants. Parcours en trois étapes : essence/dimension à travers le fil/sens du débit ; humidité ; résultat. Dix-sept essences, coefficients moyens radial et tangentiel issus du dossier sources Éduscol du Concours Général des Métiers TMA 2022, DS 2/9. Le débit inconnu présente les deux extrêmes radial/tangentiel, sans inventer une valeur précise pour les débits intermédiaires.
+
+Deux modes : humidité du bois au départ et à l’arrivée (mesurée au testeur), ou humidité relative et température de l’air pour les deux ambiances. Le second mode estime l’humidité du bois à l’équilibre par Hailwood–Horrobin/Simpson avec les paramètres en °C du Wood Handbook. Il ne mesure pas le bois, ne fournit pas de délai de stabilisation et n’assimile pas HR et humidité du bois. Paramètres documentés aussi dans le rapport universitaire « Structural Health Monitoring of House Charlie », 2019, équations 1–2 : https://www.diva-portal.org/smash/get/diva2:1424981/FULLTEXT01.pdf .
+
+Modèle de mouvement linéaire : Δdimension = dimension initiale × coefficient × (Hfinale − Hinitiale) / 100. Les coefficients sont exprimés en % de dimension par point de pourcentage d’humidité du bois, pas des retraits totaux vert/anhydre. Domaine volontairement limité au bois en service entre 1 et 20 % d’humidité, température 0–40 °C et HR 10–95 %. Si l’équilibre estimé dépasse 20 %, le calcul est refusé ; pas de résultat extrapolé pour bois vert/saturé. Ni MDF, ni contreplaqué, ni bois modifié thermiquement, ni changement longitudinal, ni déformation sous contrainte d’assemblage.
+
+Résultat signé au millimètre (une variation non nulle inférieure à 0,5 mm reste signalée comme « moins de 1 mm »), dimension finale, mouvement total à permettre arrondi au millimètre supérieur. Cette course n’est pas un jeu de montage garanti et n’ajoute aucune marge arbitraire. Les coefficients dans les détails gardent deux décimales pour ne pas fausser les données. Les calculs internes ne sont pas arrondis. Sauvegarde de toutes les entrées dans les projets et exports texte/PDF via les actions communes.
+
+Code : `hygrometry.js` (données sourcées et moteur pur), `hygrometry-tool.js` (interface), icône SVG locale. Aucun capteur de température ou d’humidité supposé présent dans le téléphone. Fonctionnement hors connexion.
+
+Source des coefficients et formule de mouvement : https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/14665/14665-dossier-source.pdf . Origine du modèle d’équilibre : https://www.fpl.fs.usda.gov/documnts/pdf1973/simps73a.pdf . Coefficients et modèle vérifiés le 14/10/2026.
