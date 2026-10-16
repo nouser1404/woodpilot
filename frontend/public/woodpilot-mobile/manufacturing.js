@@ -1,3 +1,4 @@
+import {pieceReferences} from './nesting-references.js';
 import { validateNestingDetails } from './nesting-details.js';
 import { solveReusableNesting } from './nesting-optimizer.js';
 export function validateCutList(data) {
@@ -19,11 +20,12 @@ export function validateCutList(data) {
 export function calculateNesting(data) {
   validateCutList(data);
   const groups=new Map();
-  data.pieces.forEach((piece,index)=>{const key=piece.thicknessMm;if(!groups.has(key))groups.set(key,[]);groups.get(key).push({...piece,id:`P${index+1}`,code:`P${index+1}`});});
+  const references=pieceReferences(data.pieces);
+  data.pieces.forEach((piece,index)=>{const key=piece.thicknessMm;if(!groups.has(key))groups.set(key,[]);groups.get(key).push({...piece,id:`P${index+1}`,code:references[index]});});
   const margin=data.panel.edgeMarginMm??0;
   const usable={...data.panel,lengthMm:data.panel.lengthMm-2*margin,widthMm:data.panel.widthMm-2*margin};
   return [...groups].map(([thickness,pieces])=>{
-    const result=solveReusableNesting(usable,pieces);
+    const result=solveReusableNesting(usable,pieces,data.optimization);
     if(data.sourceOffcut&&result.panels.length>1){result.overflowPieces.push(...result.panels.slice(1).flatMap(panel=>panel.pieces));result.panels=result.panels.slice(0,1);}
     for(const panel of result.panels)for(const rect of [...panel.pieces,...panel.freeRects]){rect.x+=margin;rect.y+=margin;}
     result.panelLengthMm=data.panel.lengthMm;result.panelWidthMm=data.panel.widthMm;

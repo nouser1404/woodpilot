@@ -198,7 +198,7 @@ test('Rapport calpinage : occurrences, projet, matériau, date et pertes pondér
   const {calculateNesting}=await import('../public/woodpilot-mobile/manufacturing.js');
   const data={projectName:'Cuisine',material:'MDF',panel:{lengthMm:1000,widthMm:1000,sawKerfMm:4},pieces:[{name:'Porte',lengthMm:500,widthMm:200,thicknessMm:19,quantity:2,allowRotation:false,chantTop:true}]};
   const text=nestingReport(data,calculateNesting(data),new Date(2026,9,10));
-  for(const expected of ['Projet : Cuisine','Matériau : MDF','10/10/2026','2 occurrences','1 panneaux','taux de chute : 80','P1 · 2 occurrence(s) · Porte','Chants : haut'])assert.ok(text.includes(expected),expected);
+  for(const expected of ['Projet : Cuisine','Matériau : MDF','10/10/2026','2 occurrences','1 panneaux','taux de chute : 80','POR1 · 2 occurrence(s) · Porte','Chants : haut'])assert.ok(text.includes(expected),expected);
 });
 
 test('Marge panneau : surface utile, décalage, pertes et chutes sans bord à rafraîchir',async()=>{
