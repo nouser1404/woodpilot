@@ -1,3 +1,6 @@
+import {createProjectPdf} from './project-report.js';
+import {projectReportFilename} from './project-report-model.js';
+import {shareFile} from './export-result.js';
 import { prepareOffcutImport } from './offcuts.js';
 import { editText } from './text-input.js';
 import { listProjects,newProject,putProject,getProject,saveEntry,trashProject,restoreProject,listOffcuts,importWorkspace } from './project-store.js';
@@ -32,6 +35,8 @@ export function createProjectsUI({tools,openTool,notify}) {
     nameSheet.showModal();input.focus();
   }
   root.querySelector('[data-new-project]').onclick=()=>askName(async name=>putProject(newProject(name)));
+  const exportActions=document.createElement('section');exportActions.className='project-pdf-actions';exportActions.setAttribute('aria-label','PDF du projet');const pdfStatus=document.createElement('p');pdfStatus.setAttribute('role','status');pdfStatus.setAttribute('aria-live','polite');
+  for(const [label,share] of [['Télécharger le PDF complet',false],['Partager le PDF complet',true]]){const action=button(label,async()=>{const id=currentId;exportActions.querySelectorAll('button').forEach(b=>b.disabled=true);pdfStatus.textContent='Préparation du dossier…';try{const project=await getProject(id);const blob=await createProjectPdf(project,{onProgress:message=>pdfStatus.textContent=message});if(share)await shareFile(blob,projectReportFilename(project.name),project.name,notify);else downloadBlob(blob,projectReportFilename(project.name));pdfStatus.textContent='PDF complet prêt.';}catch(error){pdfStatus.textContent='Export impossible : '+error.message;throw error;}finally{exportActions.querySelectorAll('button').forEach(b=>b.disabled=false);}});exportActions.append(action);}exportActions.append(pdfStatus);detail.querySelector('.tool-header').after(exportActions);
   async function showProject(id) {
     currentId=id;const project=await getProject(id);if(!project||project.deletedAt)throw new Error('Projet indisponible.');
     detail.querySelector('h2').textContent=project.name;detail.querySelector('[data-project-notes]').textContent=project.notes||'Aucune note technique.';

@@ -15,6 +15,7 @@ export function createPhotoTool({notify,haptic,transfer}) {
   let image=null,imageData='',lines=[],pending=null,dragStart=null,selectedSegment=null,annotations=[],notes='',segments=[],annotationMode=false,generation=0;
   let moving=null,flow;
   const viewport=photoViewport(canvas,()=>{dragStart=null;moving=null;});
+  viewport.controls.append(root.querySelector('[data-undo]'));
   const calibrated=calibrationUI(root,{getImage:()=>image,render,notify,clearPending(){pending=null;moving=null;selectedSegment=null;}});
   flow=createPhotoFlow(root,{getImage:()=>image,calibrated,render});flow.update();
   let worker;try{worker=new Worker(new URL('./edge-worker.js',import.meta.url),{type:'module'});}catch{}
@@ -60,7 +61,7 @@ export function createPhotoTool({notify,haptic,transfer}) {
       remove.onclick=()=>{if(selectedSegment===line)selectedSegment=null;lines.splice(index,1);render();};row.append(edit,remove);list.append(row);
     });
     root.querySelectorAll('[data-save],[data-share],[data-undo]').forEach(button=>button.disabled=false);
-    root.querySelector('[data-undo]').disabled=!lines.length&&!pending;
+    root.querySelector('[data-undo]').disabled=!lines.length&&!pending&&!annotationMode;
   }
   async function importFile(file) {
     if(!file)return;
@@ -70,7 +71,7 @@ export function createPhotoTool({notify,haptic,transfer}) {
       const next=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});
       const nextImage=await loadImage(next);
       if(nextImage.width*nextImage.height>32000000)throw new Error('Image trop grande');
-      imageData=next;image=nextImage;lines=[];annotations=[];notes='';root.querySelector('[data-photo-notes]').value='';pending=null;error.textContent='';canvas.hidden=false;viewport.reset();flow.imported();calibrated.reset();render();detect();haptic();
+      imageData=next;image=nextImage;lines=[];annotations=[];notes='';selectedSegment=null;annotationMode=false;dragStart=null;moving=null;root.querySelector('[data-photo-notes]').value='';pending=null;error.textContent='';canvas.hidden=false;viewport.reset();flow.imported();calibrated.reset();render();detect();haptic();
     }catch(reason){error.textContent='Image non lisible ou supérieure à 32 mégapixels. Essayez une photo JPEG, PNG ou WebP de résolution inférieure.';}finally{URL.revokeObjectURL(url);}
   }
   root.querySelectorAll('input[type="file"]').forEach(input=>input.onchange=async()=>{
@@ -89,7 +90,7 @@ export function createPhotoTool({notify,haptic,transfer}) {
   }
   root.querySelector('[data-detect]').onclick=detect;root.querySelector('[data-show-edges]').onchange=render;
   root.querySelector('[data-photo-notes]').oninput=event=>notes=event.target.value;
-  root.querySelector('[data-annotate]').onclick=()=>{if(!image){notify('Importez une photo.');return;}annotationMode=true;notify('Touchez la position de l’annotation.');};
+  root.querySelector('[data-annotate]').onclick=()=>{if(!image){notify('Importez une photo.');return;}annotationMode=true;render();notify('Touchez la position de l’annotation.');};
   root.querySelector('[data-to-cabinet]').onclick=()=>{try{choosePhotoDimensions(lines.filter(line=>!line.unreliable),transfer);}catch(reason){notify(reason.message);}};
   canvas.onpointerdown=event=>{if(!image)return;dragStart=point(event);moving=null;
     if(selectedSegment?.source){const rect=canvas.getBoundingClientRect();for(const key of ['a','b'])if(Math.hypot((selectedSegment[key].x-dragStart.x)*rect.width,(selectedSegment[key].y-dragStart.y)*rect.height)<24)moving={line:selectedSegment,key,previous:{...selectedSegment[key]}};}
@@ -107,7 +108,7 @@ export function createPhotoTool({notify,haptic,transfer}) {
   };
   canvas.onpointercancel=()=>{dragStart=null;moving=null;};
   canvas.onkeydown=event=>{if(event.key==='Escape'){pending=null;selectedSegment=null;render();}};
-  root.querySelector('[data-undo]').onclick=()=>{if(pending)pending=null;else{const line=lines.pop();if(selectedSegment===line)selectedSegment=null;}render();};
+  root.querySelector('[data-undo]').onclick=()=>{if(annotationMode)annotationMode=false;else if(pending)pending=null;else{const line=lines.pop();if(selectedSegment===line)selectedSegment=null;}render();};
   return {root,open(){root.showModal();},snapshot(){if(!imageData)throw new Error('Importez une photo avant de l’enregistrer.');return {image:imageData,lines:structuredClone(lines),annotations:structuredClone(annotations),notes,calibration:calibrated.calibration,mode:calibrated.mode};},
     async load(data){validatePhoto(data);const next=await loadImage(data.image);imageData=data.image;image=next;lines=structuredClone(data.lines);annotations=structuredClone(data.annotations||[]);notes=data.notes||'';root.querySelector('[data-photo-notes]').value=notes;pending=null;canvas.hidden=false;viewport.reset();flow.imported();calibrated.load(data.calibration,data.mode);lines=recalculatePhotoLines(lines,image.width,image.height);if(lines.some(line=>line.unreliable))notify('Certaines anciennes cotes sont trop instables : recalibrez-les avant utilisation.');render();detect();},
     text(){return `WoodPilot — Photo Métré\n${calibrated.provenance()}\n${PHOTO_WARNING}\n${lines.map((line,i)=>`Cote ${i+1} : ${line.unreliable?'À recalibrer':formatMeasure(line.value)+' mm'} (${line.source==='aruco'?'ArUco, coplanaire':line.source?'distance connue, approximative':'saisie manuelle'})`).join('\n')}\n${annotations.map(note=>note.text).join('\n')}\n${notes}`;},
