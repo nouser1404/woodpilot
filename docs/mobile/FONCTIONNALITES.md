@@ -200,3 +200,5 @@ Les repères utilisent des acronymes métier numérotés (MT, PLI, TAB, TR, etc.
 
 ### Boutons et installation PWA
 Boutons harmonisés : action principale rouge, actions secondaires avec fond discret, commandes icônes en carré arrondi, états appuyé/sélectionné/désactivé/focus et respect de la réduction des animations. Cibles tactiles conservées (44–48 px). La Toolbox possède un manifeste standalone, des icônes et un service worker de cache. Une installation sur téléphone nécessite son URL publique HTTPS ; sur iPhone, ouvrir dans Safari puis Partager > Sur l’écran d’accueil (activer Ouvrir comme app web si proposé). Le dépôt GitHub ne constitue pas le déploiement. Tester le premier chargement en ligne puis la réouverture hors connexion sur l’appareil. Les fonds de carte et aperçus fabricant distants nécessitent Internet.
+
+Sélecteurs et sections dépliables harmonisés : fond discret, rayon14px, chevron, états focus/désactivé, sélection native conservée pour iOS et clavier. Sections ouvertes avec séparation du contenu.
