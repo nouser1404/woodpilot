@@ -372,3 +372,21 @@ html[data-theme="light"]{color-scheme:light}
 .photo-controls .photo-step-actions{display:contents}.photo-controls .photo-step-actions button{width:auto;margin:0;min-height:44px}.photo-controls .photo-step-actions .icon-btn{width:48px;height:48px;padding:0}
 
 .nesting-optimization{border:0;padding:12px 0;margin:0}.nesting-optimization-options{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.nesting-optimization-options button{flex:1;min-width:110px}.nesting-optimization-options [aria-pressed="true"]{border-color:var(--primary,#DC2E2E);box-shadow:inset 0 0 0 1px var(--primary,#DC2E2E)}.nesting-table-scroll{overflow-x:auto;margin-top:16px}.nesting-pieces-table{width:100%;border-collapse:collapse;font-size:12px}.nesting-pieces-table caption{text-align:left;font-weight:600;margin-bottom:8px}.nesting-pieces-table th,.nesting-pieces-table td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--border,#7775)}.nesting-pieces-table td:nth-child(3){white-space:nowrap}.nesting-pieces-table td:nth-child(4){text-align:center;font-weight:700}
+/* Commandes tactiles : hiérarchie commune, relief discret et retour immédiat. */
+:root{--button-radius:14px;--button-fill:color-mix(in srgb,var(--color-surface-raised) 78%,var(--color-surface));--button-shadow:0 1px 2px #0000000d}
+.primary-btn,.secondary-btn,.icon-btn{appearance:none;-webkit-appearance:none;touch-action:manipulation;cursor:pointer;transition:background-color 140ms,border-color 140ms,box-shadow 140ms,transform 100ms;color:var(--color-text);font-size:14px;line-height:1.3;font-weight:600;letter-spacing:-.015em;min-width:0}
+.primary-btn,.secondary-btn{min-height:48px;border-radius:var(--button-radius);padding:12px 16px}
+.primary-btn{background:var(--color-primary);color:var(--color-on-primary);box-shadow:0 2px 4px #00000014,inset 0 1px 0 #ffffff22;border:1px solid transparent}
+.secondary-btn{background:var(--button-fill);border:1px solid color-mix(in srgb,var(--color-border) 65%,transparent);box-shadow:var(--button-shadow)}
+.icon-btn{flex-shrink:0;width:44px;height:44px;border-radius:13px;background:var(--button-fill);border:1px solid var(--color-border);box-shadow:var(--button-shadow)}
+.primary-icon{background:var(--color-primary);color:var(--color-on-primary);border-color:transparent}
+.primary-btn .material-symbols-rounded,.secondary-btn .material-symbols-rounded{font-size:21px}
+.primary-btn:focus-visible,.secondary-btn:focus-visible,.icon-btn:focus-visible{outline:3px solid var(--color-accent-text);outline-offset:3px}
+.primary-btn:active:not(:disabled),.secondary-btn:active:not(:disabled),.icon-btn:active:not(:disabled){transform:scale(.98);box-shadow:inset 0 1px 3px #0000001a}
+.secondary-btn[aria-pressed="true"],.icon-btn[aria-pressed="true"]{background:color-mix(in srgb,var(--color-primary) 12%,var(--color-surface));border-color:var(--color-primary);color:var(--color-accent-text)}
+.primary-btn:disabled,.secondary-btn:disabled,.icon-btn:disabled{opacity:.42;cursor:default;box-shadow:none}
+.result-actions{gap:10px}.result-actions .primary-btn,.result-actions .secondary-btn{margin-top:12px}
+.photo-controls .icon-btn{border-radius:13px}
+@media(hover:hover){.secondary-btn:hover:not(:disabled),.icon-btn:hover:not(:disabled){background:color-mix(in srgb,var(--button-fill) 88%,var(--color-text));border-color:var(--color-border-strong)}.primary-btn:hover:not(:disabled){background:color-mix(in srgb,var(--color-primary) 90%,#000)}}
+@media(prefers-reduced-motion:reduce){.primary-btn,.secondary-btn,.icon-btn{transition:none}.primary-btn:active:not(:disabled),.secondary-btn:active:not(:disabled),.icon-btn:active:not(:disabled){transform:none}}
+.guided-navigation .primary-btn,.guided-navigation .secondary-btn{margin-top:0;flex:1}
