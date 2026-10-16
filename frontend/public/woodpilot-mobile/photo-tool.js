@@ -39,8 +39,9 @@ export function createPhotoTool({notify,haptic,transfer}) {
       if(value!==undefined){const text=`${formatMeasure(value)} mm`,w=ctx.measureText(text).width;
         const x=Math.max(w/2+8*scale,Math.min(canvas.width-w/2-8*scale,(x1+x2)/2));
         const y=Math.max(30*scale,Math.min(canvas.height-8*scale,(y1+y2)/2-10*scale));
-        ctx.fillStyle=styles.getPropertyValue('--color-background').trim();ctx.fillRect(x-w/2-6*scale,y-24*scale,w+12*scale,32*scale);
+        ctx.save();ctx.globalAlpha=.72;ctx.fillStyle=styles.getPropertyValue('--color-background').trim();ctx.beginPath();ctx.roundRect(x-w/2-6*scale,y-24*scale,w+12*scale,32*scale,7*scale);ctx.fill();ctx.restore();
         ctx.fillStyle=styles.getPropertyValue('--color-text').trim();ctx.textAlign='center';ctx.fillText(text,x,y);
+        for(const [px,py] of [[x1,y1],[x2,y2]]){ctx.beginPath();ctx.arc(px,py,5*scale,0,2*Math.PI);ctx.fillStyle=color;ctx.fill();}
       }
     }
     if(root.querySelector('[data-show-edges]').checked){ctx.save();ctx.strokeStyle=styles.getPropertyValue('--color-construction-line').trim();ctx.lineWidth=3*scale;ctx.setLineDash([5*scale,4*scale]);segments.forEach(line=>{ctx.beginPath();ctx.moveTo(line.a.x*canvas.width,line.a.y*canvas.height);ctx.lineTo(line.b.x*canvas.width,line.b.y*canvas.height);ctx.stroke();});ctx.restore();}
