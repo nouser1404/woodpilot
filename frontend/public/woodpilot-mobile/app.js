@@ -1,3 +1,4 @@
+import {installInvitation} from './pwa-install.js';
 import {createHygrometryTool} from './hygrometry-tool.js';
 import {calculateHygrometry} from './hygrometry.js';
 import {createSuppliersTool} from './suppliers-tool.js';
@@ -153,3 +154,5 @@ keepScreenAwake({onStatus(state){
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').then(async registration=>{const worker=registration.installing||registration.waiting;if(worker&&worker.state!=='activated')await new Promise((resolve,reject)=>{worker.addEventListener('statechange',()=>{if(worker.state==='activated')resolve();if(worker.state==='redundant')reject(new Error('Cache indisponible'));});});await navigator.serviceWorker.ready;}).then(()=>offlineStatus.textContent='Prêt hors connexion · données sur cet appareil').catch(()=>offlineStatus.textContent='Cache hors connexion indisponible dans ce navigateur');
 }else offlineStatus.textContent='Les outils fonctionnent localement ; le cache hors connexion est indisponible.';
+
+installInvitation();

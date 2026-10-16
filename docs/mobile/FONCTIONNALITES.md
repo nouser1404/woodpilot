@@ -206,3 +206,6 @@ Sélecteurs et sections dépliables harmonisés : fond discret, rayon14px, chevr
 Photo Métré : étiquettes de cote à fond arrondi et opacité72 %, texte opaque ; extrémités des cotes redessinées au-dessus du fond. Même rendu dans les exports photo et le PDF projet.
 
 Photo Métré : retour au mode retiré de la barre, annulation alignée avec zoom/déplacement, ligne commune Arêtes/recherche/annotation. « Ajouter une prise de côte » sous la photo (changement de photo avec possibilité d’annuler). Actions caisson/projet/partage légendées.
+
+### Invitation à installer la PWA
+Une popup apparaît une seule fois par navigateur/origine (stockage local), en contexte sécurisé, sans interrompre un outil ouvert. Installation native uniquement si beforeinstallprompt est proposé ; sinon aide iPhone/Safari ou menu du navigateur. Pas d’invitation en mode standalone ni après installation constatée localement. iOS ne permet pas de vérifier universellement depuis Safari si une PWA est déjà installée ailleurs : la détection porte sur le mode courant et les événements/indicateurs mémorisés. Un effacement des données peut réafficher l’invitation. Fermer ou continuer ne déclenche aucune installation.
