@@ -204,3 +204,5 @@ Boutons harmonisés : action principale rouge, actions secondaires avec fond dis
 Sélecteurs et sections dépliables harmonisés : fond discret, rayon14px, chevron, états focus/désactivé, sélection native conservée pour iOS et clavier. Sections ouvertes avec séparation du contenu.
 
 Photo Métré : étiquettes de cote à fond arrondi et opacité72 %, texte opaque ; extrémités des cotes redessinées au-dessus du fond. Même rendu dans les exports photo et le PDF projet.
+
+Photo Métré : retour au mode retiré de la barre, annulation alignée avec zoom/déplacement, ligne commune Arêtes/recherche/annotation. « Ajouter une prise de côte » sous la photo (changement de photo avec possibilité d’annuler). Actions caisson/projet/partage légendées.
