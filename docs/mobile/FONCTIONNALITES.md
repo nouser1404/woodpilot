@@ -209,3 +209,5 @@ Photo Métré : retour au mode retiré de la barre, annulation alignée avec zoo
 
 ### Invitation à installer la PWA
 Une popup apparaît une seule fois par navigateur/origine (stockage local), en contexte sécurisé, sans interrompre un outil ouvert. Installation native uniquement si beforeinstallprompt est proposé ; sinon aide iPhone/Safari ou menu du navigateur. Pas d’invitation en mode standalone ni après installation constatée localement. iOS ne permet pas de vérifier universellement depuis Safari si une PWA est déjà installée ailleurs : la détection porte sur le mode courant et les événements/indicateurs mémorisés. Un effacement des données peut réafficher l’invitation. Fermer ou continuer ne déclenche aucune installation.
+
+Visuels PWA : icônes PNG192/512 et SVG reprenant le logo WoodPilot existant, fond de lancement blanc cohérent, splash portrait1125×2436 pour iPhone13mini (viewport375×812 DPR3). Les autres formats iOS gardent le comportement système. Tester sur appareil après réinstallation/actualisation des métadonnées ; le cache des icônes du système peut persister.
